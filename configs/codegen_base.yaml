@@ -1,0 +1,100 @@
+# CODEGEN_BASE.YAML
+# Base configuration for HRM code generation adaptation
+# Last updated: 2025-08-05
+
+# Task specification
+task: codegen  # Switch from puzzle to code generation
+tokenizer_name: gpt2  # Use GPT-2 tokenizer
+
+# Model architecture
+model:
+  name: HierarchicalReasoningModel_ACTV1
+  causal: true  # Enable causal masking for autoregressive generation
+  
+  # Core architecture parameters
+  hidden_size: 768
+  num_heads: 12
+  expansion: 4.0
+  pos_encodings: rope  # Use RoPE for position encoding
+  
+  # Hierarchical reasoning layers
+  H_layers: 6
+  L_layers: 2
+  H_cycles: 1
+  L_cycles: 2
+  
+  # Input/Output configuration
+  puzzle_emb_ndim: 0  # Disable puzzle embeddings
+  num_puzzle_identifiers: 1  # Required but unused
+  vocab_size: 50257  # GPT-2 vocabulary size
+  
+  # Numerical stability
+  rms_norm_eps: 1e-5
+  rope_theta: 10000.0
+  forward_dtype: bfloat16
+  
+  # ACT configuration (can be disabled for code generation)
+  halt_max_steps: 1  # Disable adaptive computation time
+  halt_exploration_prob: 0.0
+  enable_q_head: false  # Disable Q-head for code generation
+
+# Data configuration
+data:
+  train_path: data/mbpp/train_raw.json
+  test_path: data/mbpp/test_raw.json
+  
+  # Sequence parameters
+  seq_len: 512
+  batch_size: 8
+  
+  # Prompt formatting
+  prompt_template: "# {text}\n\n"
+  include_tests_in_prompt: true
+  test_template: "# Test cases:\n# {test}\n\n"
+  
+  # Development mode (for quick iterations)
+  dev_mode: false
+  dev_samples: 100
+  validate_data: true
+
+# Training configuration
+training:
+  optimizer:
+    name: AdamW
+    lr: 5e-5
+    weight_decay: 0.01
+    beta1: 0.9
+    beta2: 0.95
+    
+  scheduler:
+    name: cosine
+    warmup_steps: 100
+    
+  # Training loop
+  max_steps: 10000
+  eval_every: 500
+  save_every: 1000
+  gradient_accumulation_steps: 4
+  
+  # Mixed precision
+  fp16: true
+  bf16: false
+
+# Evaluation configuration
+evaluation:
+  metric: pass@k
+  k_values: [1, 5, 10]
+  max_generate_tokens: 256
+  temperature: 0.8
+  num_samples: 100
+  timeout_seconds: 5
+
+# Logging and checkpoints
+logging:
+  log_level: INFO
+  use_wandb: true
+  project_name: hrm-codegen
+  
+checkpoints:
+  path: checkpoints/codegen
+  keep_last_n: 3
