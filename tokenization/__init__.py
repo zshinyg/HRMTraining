@@ -38,7 +38,11 @@ def get_tokenizer(force_reload: bool = False) -> PreTrainedTokenizer:
             _tokenizer = AutoTokenizer.from_pretrained(_CACHE_DIR)
         else:
             # Load from HuggingFace and save locally
-            _tokenizer = AutoTokenizer.from_pretrained("gpt2", add_bos_token=True)
+            _tokenizer = AutoTokenizer.from_pretrained("gpt2")
+            
+            # Set up special tokens - GPT-2 uses the same token for bos/eos/pad
+            _tokenizer.pad_token = _tokenizer.eos_token
+            
             _tokenizer.save_pretrained(_CACHE_DIR)
             
     return _tokenizer
@@ -46,10 +50,10 @@ def get_tokenizer(force_reload: bool = False) -> PreTrainedTokenizer:
 
 def encode(
     text: Union[str, List[str]],
-    add_bos: bool = True,
+    add_bos: bool = False,
     add_eos: bool = False,
     max_length: Optional[int] = None,
-    padding: bool = False,
+    padding: Union[bool, str] = True,
     truncation: bool = True,
     return_tensors: Optional[str] = None,
 ) -> Dict[str, Union[List[int], torch.Tensor]]:
@@ -61,7 +65,7 @@ def encode(
         add_bos: Whether to add the beginning-of-sequence token
         add_eos: Whether to add the end-of-sequence token
         max_length: Maximum sequence length (will truncate if needed)
-        padding: Whether to pad sequences to max_length
+        padding: Type of padding strategy, or whether to pad
         truncation: Whether to truncate sequences to max_length
         return_tensors: Output format ('pt' for PyTorch tensors, None for lists)
         
@@ -70,19 +74,61 @@ def encode(
     """
     tokenizer = get_tokenizer()
     
+    # Resolve padding strategy -------------------------------------------------
+    #  • If caller passed an explicit string/False we keep it.
+    #  • If caller passed boolean `True` we choose a sensible default:
+    #       ‣ "max_length" when `max_length` is provided
+    #       ‣ "longest"   otherwise
+    if isinstance(padding, bool):
+        if padding:
+            padding_strategy: Union[bool, str] = "max_length" if max_length else "longest"
+        else:
+            padding_strategy = False
+    else:
+        # caller already provided string strategy ("max_length", "longest") or similar
+        padding_strategy = padding
+
     # Handle single strings
-    if isinstance(text, str):
+    is_single_text = isinstance(text, str)
+    if is_single_text:
         text = [text]
-        
+    
     # Encode with appropriate special tokens
     encoded = tokenizer(
         text,
         add_special_tokens=True,
-        padding=padding,
+        padding=padding_strategy,
         truncation=truncation,
         max_length=max_length,
         return_tensors=return_tensors,
     )
+    
+    # Manually add BOS/EOS if requested
+    if add_bos or add_eos:
+        input_ids = encoded["input_ids"]
+        if isinstance(input_ids, torch.Tensor):
+            # Handle tensor case
+            batch_size = input_ids.size(0)
+            if add_bos:
+                bos_tensor = torch.full((batch_size, 1), tokenizer.bos_token_id, 
+                                        dtype=input_ids.dtype, device=input_ids.device)
+                input_ids = torch.cat([bos_tensor, input_ids], dim=1)
+            if add_eos:
+                eos_tensor = torch.full((batch_size, 1), tokenizer.eos_token_id, 
+                                        dtype=input_ids.dtype, device=input_ids.device)
+                input_ids = torch.cat([input_ids, eos_tensor], dim=1)
+            encoded["input_ids"] = input_ids
+        else:
+            # Handle list case
+            for i in range(len(input_ids)):
+                if add_bos:
+                    input_ids[i] = [tokenizer.bos_token_id] + input_ids[i]
+                if add_eos:
+                    input_ids[i] = input_ids[i] + [tokenizer.eos_token_id]
+    
+    # If single text was passed, and we're not returning tensors, unwrap the batch
+    if is_single_text and return_tensors is None:
+        encoded = {k: v[0] for k, v in encoded.items()}
     
     return encoded
 
@@ -106,42 +152,65 @@ def create_training_batch(
         Dictionary with 'input_ids' and 'labels' tensors
     """
     tokenizer = get_tokenizer()
-    batch = {"input_ids": [], "labels": []}
+    batch_size = len(prompts)
+    
+    # Prepare input_ids and labels arrays
+    input_ids = []
+    labels = []
     
     for prompt, completion in zip(prompts, completions):
-        # Encode prompt and completion
-        prompt_ids = tokenizer.encode(prompt, add_special_tokens=True)
-        completion_ids = tokenizer.encode(completion, add_special_tokens=False)
+        # Encode prompt and completion separately
+        prompt_tokens = tokenizer.encode(prompt, add_special_tokens=True)
+        completion_tokens = tokenizer.encode(completion, add_special_tokens=False)
         
-        # Combine prompt and completion
-        input_ids = prompt_ids + completion_ids
+        # Combine for full sequence
+        combined_tokens = prompt_tokens + completion_tokens
         
-        # Truncate if necessary
-        if len(input_ids) > max_length:
-            input_ids = input_ids[:max_length]
+        # Truncate if too long
+        if len(combined_tokens) > max_length:
+            combined_tokens = combined_tokens[:max_length]
         
-        # Create labels: -100 for prompt tokens (ignored in loss), shifted for completion
-        labels = [-100] * len(prompt_ids) + completion_ids
+        # Create labels: -100 for prompt (ignored in loss calculation)
+        # and shifted sequence for completion
+        prompt_len = min(len(prompt_tokens), max_length)
+        seq_labels = [-100] * prompt_len
         
-        # Truncate labels if necessary
-        if len(labels) > max_length:
-            labels = labels[:max_length]
-            
-        # Pad to max_length if needed
-        if len(input_ids) < max_length:
-            padding_length = max_length - len(input_ids)
-            input_ids = input_ids + [tokenizer.pad_token_id] * padding_length
-            labels = labels + [-100] * padding_length
-            
-        batch["input_ids"].append(input_ids)
-        batch["labels"].append(labels)
+        # Add completion labels (shifted for next-token prediction)
+        remaining_length = max_length - prompt_len
+        completion_len = min(len(completion_tokens), remaining_length)
+        
+        # For completion tokens, each label is the next token
+        for i in range(completion_len - 1):
+            seq_labels.append(completion_tokens[i + 1])
+        
+        # Last completion token predicts EOS or padding
+        if completion_len > 0:
+            if prompt_len + completion_len < max_length:
+                seq_labels.append(tokenizer.eos_token_id)
+            else:
+                seq_labels.append(-100)  # No target for last token if at max_length
+        
+        # Pad sequences to max_length
+        padding_length = max_length - len(combined_tokens)
+        if padding_length > 0:
+            combined_tokens.extend([tokenizer.pad_token_id] * padding_length)
+            seq_labels.extend([-100] * padding_length)
+        
+        # Ensure labels are exactly max_length
+        seq_labels = seq_labels[:max_length]
+        
+        input_ids.append(combined_tokens)
+        labels.append(seq_labels)
     
     # Convert to tensors if requested
     if return_tensors == "pt":
-        batch["input_ids"] = torch.tensor(batch["input_ids"])
-        batch["labels"] = torch.tensor(batch["labels"])
+        input_ids = torch.tensor(input_ids)
+        labels = torch.tensor(labels)
     
-    return batch
+    return {
+        "input_ids": input_ids,
+        "labels": labels
+    }
 
 
 def decode(
@@ -162,12 +231,13 @@ def decode(
     
     # Convert tensor to list if needed
     if isinstance(token_ids, torch.Tensor):
-        token_ids = token_ids.tolist()
-        
-    # Handle batch inputs (first element only)
-    if isinstance(token_ids[0], list) or (
-        isinstance(token_ids, torch.Tensor) and token_ids.dim() > 1
-    ):
+        if token_ids.dim() > 1:
+            # Handle batch dimension
+            token_ids = token_ids[0].tolist()
+        else:
+            token_ids = token_ids.tolist()
+    elif isinstance(token_ids[0], list):
+        # Handle batch inputs (first element only)
         token_ids = token_ids[0]
         
     return tokenizer.decode(token_ids, skip_special_tokens=skip_special_tokens)
