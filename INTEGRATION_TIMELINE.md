@@ -11,7 +11,6 @@ _Last updated: 2025-08-05_
 | **Phase 3 Engineering** | Software-Engineering Droid + Eng team | Implementation | 60 % | Data layer adaptation in PR review | **Aug-07** |
 | **Research** | Research Droid | Analysis | 10 % | Raw-stats pipeline scaffolded | **Aug-11** |
 | **Infrastructure** | Infrastructure Droid | Setup | 25 % | CI lint/test workflow green | **Aug-09** |
-| **Data** | Data Droid | Analysis | 5 % | Duplicate/quality scan script | **Aug-10** |
 | **Product** | Product Droid (this doc) | Coordination | 100 % | Success criteria, roadmap, UX, docs | — |
 
 ---
@@ -23,7 +22,7 @@ _Last updated: 2025-08-05_
 | Engineering → Product | Working generate()/train | **Yes** | Required to freeze UX API |
 | Engineering → Research | Checkpoint `dev-best.pt` | **No** | For baseline comparisons |
 | Engineering → Infrastructure | Dockerfile + start script | **Yes** | CI packaging & benchmark jobs |
-| Data → Engineering | Cleaned dataset splits | **Yes** | Needed before Phase 3 final tuning |
+| Research → Engineering | Cleaned dataset splits | **Yes** | Needed before Phase 3 final tuning |
 | Research → Product | Baseline benchmark report | **No** | Informs Phase 4 targets |
 | Infrastructure → All | CI gates & badges | **Yes** | Must be green before merge to `main` |
 
@@ -34,9 +33,7 @@ _Handoff points marked **Yes** form the critical path._
 ## 3 · Critical Path Analysis (Phase 3 → Phase 4)
 
 ```
-Data cleansing ─┐
-                ├─► Engineering final tune ─► “dev-best.pt”
-Research stats ─┘                           │
+Clean-data + stats ─► Engineering final tune ─► “dev-best.pt”
                                              │
 Docker/CI setup ──► Perf bench ► Validation ─┘
 ```
@@ -55,7 +52,7 @@ Slack in path: Research (can continue during Phase 4).
 | C3 | Aug-09 | Model Forward-&-Train | Eng | 1-epoch train, no NaN | loss ↓ |
 | C4 | Aug-10 | Research Baseline Drop | Research | `RESEARCH_FINDINGS.md` PR | review OK |
 | C5 | Aug-11 | Perf Benchmark | Infra | `scripts/benchmark.py` | ≥550 tok/s |
-| C6 | Aug-12 | Data Clean v1 | Data | `DATA_ANALYSIS_REPORT.md` PR | signed-off |
+| C6 | Aug-12 | Research Data-Clean v1 | Research | `DATA_ANALYSIS_REPORT.md` PR | signed-off |
 | C7 | Aug-13 | **Phase 3 Final QA** | Product | All success criteria met | see §7 |
 
 _All gates must pass to enter Phase 4._
@@ -78,9 +75,9 @@ _All gates must pass to enter Phase 4._
 
 | Channel | Purpose | Frequency |
 |---------|---------|-----------|
-| Slack `#hrm-daily` | Stand-up updates (<3 lines) | Daily 09:30 PT |
-| Slack `#hrm-blockers` | Urgent blockers, mention @owner | As needed |
-| Weekly Zoom | Progress review, gate decisions | Fridays 10:00 PT |
+| Factory message thread | Stand-up updates (<3 lines) | Daily 09:30 PT |
+| Factory “Blocker Alert” | Urgent blockers, tag responsible Droid(s) | As needed |
+| Weekly video call | Progress review, gate decisions | Fridays 10:00 PT |
 | GitHub Projects board | Task tracking / status | Real-time |
 | Docs PR reviews | Knowledge handover | 48 h SLA |
 
@@ -97,7 +94,7 @@ Document owner: **Product Droid** – updates daily.
 | **Phase 3 GA** | All §4 gates pass, Pass@1 ≥20%, training stable | Eng + Product | Tag `v0.3.0` |
 | **Infra MVP** | CI <10 min, coverage ≥90 %, security scan 0 Critical | Infra | Badge “CI-Green” |
 | **Research Report** | Baseline table vs HRM, 2 plots | Research | PR merged |
-| **Data Clean v1** | Duplicate rate <1 %, schema validated | Data | PR merged |
+| **Data Clean v1** | Duplicate rate <1 %, schema validated | Research | PR merged |
 | **Phase 4 Kick-off** | Roadmap locked, UX API frozen | Product | Meeting notes |
 
 ---
@@ -112,7 +109,7 @@ Document owner: **Product Droid** – updates daily.
 | Aug-08 | Gate C2 (CI/CD) |  |
 | Aug-09 | Gate C3 (Train stability) & Research mid-report |  |
 | Aug-10 | Gate C4 (Research) & Gate C5 (Perf benchmark) |  |
-| Aug-11 | Gate C6 (Data Clean v1) |  |
+| Aug-11 | Gate C6 (Research Data-Clean v1) |  |
 | **Aug-12** | Gate C7 – **Phase 3 Final QA** |  |
 | **Aug-13** | Phase 4 Kick-off meeting |  |
 
@@ -124,7 +121,7 @@ Document owner: **Product Droid** – updates daily.
 
 1. Owner edits file → PR → require 1 review.  
 2. Merge triggers **Docs CI** → renders timeline to GitHub Pages.  
-3. Slack bot posts daily diff summary to `#hrm-daily`.  
+3. GitHub Action comments a daily diff summary on the coordination issue.  
 
 ---
 
