@@ -2,28 +2,15 @@
 # Targets: 27M parameter model for MBPP code generation task
 # Hardware: Apple Silicon M1/M2/M3 chips with Metal Performance Shaders (MPS)
 
-# ===== System Configuration =====
-system:
-  device: "mps"  # Use Metal Performance Shaders
-  precision: "bfloat16"  # Best precision type for M1
-  seed: 42
-  deterministic: true
-  environment_variables:
-    PYTORCH_ENABLE_MPS_FALLBACK: "1"  # Avoid abort on unsupported ops
-    PYTORCH_MPS_HIGH_WATERMARK_RATIO: "0.9"  # Allow higher memory usage
-    PYTORCH_MPS_ENABLE_EAGER_MODE: "1"  # Better performance for some ops
-
 # ===== Model Configuration =====
 model:
-  name: "HierarchicalReasoningModel_ACTV1"
-  hidden_size: 768
+  hidden_dim: 768
   num_heads: 12
   high_level_dim: 768
   low_level_dim: 768
   high_level_layers: 2
   low_level_layers: 4
   high_level_steps: 16
-  low_level_steps: 64
   timing_ratio: 4
   dropout: 0.1
   activation: "gelu"
@@ -31,97 +18,42 @@ model:
   vocab_size: 50257  # GPT-2 vocabulary size
   max_position_embeddings: 1024
   tie_word_embeddings: true
-  causal: true
-  puzzle_emb_ndim: 0  # No puzzle embeddings for code generation
 
 # ===== Data Configuration =====
 data:
-  dataset: "mbpp"
-  train_file: "data/mbpp/train.jsonl"
-  val_file: "data/mbpp/valid.jsonl"
-  test_file: "data/mbpp/test.jsonl"
-  batch_size: 4  # Small batch size for M1
-  seq_len: 256
-  max_length: 512
-  num_workers: 4  # Dataloader workers
+  train_data_path: "data/mbpp/train.bin"
+  val_data_path: "data/mbpp/test.bin"  # Using test as validation
+  test_data_path: "data/mbpp/test.bin"
+  vocab_file: "data/mbpp/vocab.json"
+  merges_file: "data/mbpp/merges.txt"
+  tokenizer_type: "gpt2"
+  max_seq_length: 512
+  context_length: 256
+  target_length: 256
+  num_workers: 4
   pin_memory: false  # Not needed for MPS
-  prefetch_factor: 2
-  persistent_workers: true
-  tokenizer_name: "gpt2"
+  use_augmentation: false
+  augmentation_factor: 1
+  filter_by_length: true
+  min_length: 10
+  max_length: 512
 
 # ===== Training Configuration =====
 training:
-  task: "codegen"
-  max_steps: 20000
-  eval_steps: 500
-  save_steps: 1000
-  log_steps: 100
-  warmup_steps: 500
+  epochs: 3  # Changed from max_steps to epochs
+  global_batch_size: 32
   gradient_accumulation_steps: 8  # Accumulate gradients to simulate larger batch
-  gradient_checkpointing: true  # Save memory by recomputing forward pass
-  max_grad_norm: 1.0  # Clip gradients to prevent explosions
-  optimizer:
-    name: "AdamW"
-    lr: 5.0e-5
-    weight_decay: 0.01
-    beta1: 0.9
-    beta2: 0.999
-    eps: 1.0e-8
-  scheduler:
-    name: "cosine_with_warmup"
-    num_warmup_steps: 500
-    num_training_steps: 20000
-  
-# ===== Memory Optimization =====
-memory:
-  optimize_memory_usage: true
-  empty_cache_freq: 100  # Steps between cache clearing
-  activation_checkpointing: true
-  use_compile: true
-  compile_mode: "reduce-overhead"  # Best for M1
-  offload_optimizer: false  # Keep optimizer states in RAM
-  auto_cast: true  # Use automatic mixed precision
-  
-# ===== Checkpointing =====
-checkpoint:
-  save_total_limit: 3  # Keep only last 3 checkpoints
-  save_strategy: "steps"
-  save_steps: 1000
-  resume_from_checkpoint: null  # Set to path if resuming
-  save_safetensors: true
-  save_optimizer: true
-  
-# ===== Monitoring =====
-monitoring:
-  wandb:
-    enabled: true
-    project: "hrm-codegen"
-    name: "m1-27m-run"
-    tags: ["m1", "27m", "mbpp"]
-  tensorboard:
-    enabled: false
-  heartbeat:
-    enabled: true
-    interval_seconds: 60
-    file: "logs/heartbeat.txt"
-  
-# ===== Safety Measures =====
-safety:
-  detect_anomaly: true  # Detect NaN/Inf in gradients
-  loss_watchdog:
-    enabled: true
-    threshold: 50.0  # Alert if loss exceeds this value
-    window_size: 50  # Check over last N steps
-  auto_restart:
-    enabled: true
-    max_retries: 3
-    cooldown_minutes: 5
-  
-# ===== Evaluation =====
-evaluation:
-  metric: "pass@k"
-  k_values: [1, 10, 100]
-  num_samples: 200  # Evaluate on subset during training
-  temperature: 0.8
-  top_p: 0.95
-  max_new_tokens: 512
+  optimizer: "adamw"  # Matches OptimType enum
+  learning_rate: 5.0e-5
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  scheduler: "warmup_cosine"  # Matches SchedulerType enum
+  warmup_steps: 500
+  warmup_ratio: 0.1
+  use_mixed_precision: true
+  mixed_precision_dtype: "float16"
+  distributed: false
+  local_rank: -1
+  world_size: 1
+  dropout: 0.1
+  attention_dropout: 0.1

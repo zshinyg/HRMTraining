@@ -1,0 +1,77 @@
+2025-08-05 02:58:19,836 - __main__ - INFO - Configuration: hrm-codegen (version 0.1.0)
+2025-08-05 02:58:19,836 - __main__ - INFO - Description: HRM model adapted for code generation
+2025-08-05 02:58:19,836 - __main__ - INFO - Model parameters: 91,350,528
+2025-08-05 02:58:19,836 - __main__ - INFO - Using device: cpu
+2025-08-05 02:58:19,836 - __main__ - INFO - Loading data from data/mbpp/train.bin
+2025-08-05 02:58:19,851 - __main__ - INFO - Loaded 374 examples
+2025-08-05 02:58:21,672 - __main__ - INFO - Created model with 69,054,720 parameters
+2025-08-05 02:58:24,832 - __main__ - INFO - Loaded tokenizer from data/mbpp/
+2025-08-05 02:58:24,833 - __main__ - INFO - TensorBoard logs will be saved to logs/20250805-025824
+/Users/coltyn/Documents/Projects/Factory/HRMTraining-Clean/scripts/train.py:1132: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = GradScaler()
+/Users/coltyn/ncaa_betting_project/venv/lib/python3.13/site-packages/torch/amp/grad_scaler.py:136: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+  warnings.warn(
+2025-08-05 02:58:24,834 - __main__ - INFO - Mixed precision training enabled
+2025-08-05 02:58:24,834 - __main__ - INFO - Total training steps: 36
+2025-08-05 02:58:24,836 - __main__ - INFO - Saved config to checkpoints/final_run/config.yaml
+Epoch 0:   0%|          | 0/12 [00:00<?, ?it/s]/Users/coltyn/Documents/Projects/Factory/HRMTraining-Clean/scripts/train.py:851: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=torch.float16 if config.training.mixed_precision_dtype == "float16" else torch.bfloat16):
+/Users/coltyn/ncaa_betting_project/venv/lib/python3.13/site-packages/torch/amp/autocast_mode.py:266: UserWarning: User provided device_type of 'cuda', but CUDA is not available. Disabling
+  warnings.warn(
+2025-08-05 02:59:06,226 - __main__ - ERROR - Error during training: one of the variables needed for gradient computation has been modified by an inplace operation: [torch.FloatTensor [32, 768]], which is output 0 of AsStridedBackward0, is at version 128; expected version 113 instead. Hint: enable anomaly detection to find the operation that failed to compute its gradient, with torch.autograd.set_detect_anomaly(True).
+Traceback (most recent call last):
+  File "/Users/coltyn/Documents/Projects/Factory/HRMTraining-Clean/scripts/train.py", line 1476, in <module>
+    main()
+    ~~~~^^
+  File "/Users/coltyn/Documents/Projects/Factory/HRMTraining-Clean/scripts/train.py", line 1471, in main
+    train_worker(0, 1, config, args)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/coltyn/Documents/Projects/Factory/HRMTraining-Clean/scripts/train.py", line 1344, in train_worker
+    train(
+    ~~~~~^
+        config=config,
+        ^^^^^^^^^^^^^^
+    ...<7 lines>...
+        resume_from=args.resume,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/coltyn/Documents/Projects/Factory/HRMTraining-Clean/scripts/train.py", line 1177, in train
+    global_step, best_metrics, early_stop = train_epoch(
+                                            ~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<10 lines>...
+        eval_dataloader=eval_dataloader,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/coltyn/Documents/Projects/Factory/HRMTraining-Clean/scripts/train.py", line 876, in train_epoch
+    scaler.scale(loss).backward()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/coltyn/ncaa_betting_project/venv/lib/python3.13/site-packages/torch/_tensor.py", line 648, in backward
+    torch.autograd.backward(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        self, gradient, retain_graph, create_graph, inputs=inputs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/coltyn/ncaa_betting_project/venv/lib/python3.13/site-packages/torch/autograd/__init__.py", line 353, in backward
+    _engine_run_backward(
+    ~~~~~~~~~~~~~~~~~~~~^
+        tensors,
+        ^^^^^^^^
+    ...<5 lines>...
+        accumulate_grad=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/coltyn/ncaa_betting_project/venv/lib/python3.13/site-packages/torch/autograd/graph.py", line 824, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        t_outputs, *args, **kwargs
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )  # Calls into the C++ engine to run the backward pass
+    ^
+RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation: [torch.FloatTensor [32, 768]], which is output 0 of AsStridedBackward0, is at version 128; expected version 113 instead. Hint: enable anomaly detection to find the operation that failed to compute its gradient, with torch.autograd.set_detect_anomaly(True).
+Epoch 0:   0%|          | 0/12 [00:41<?, ?it/s]

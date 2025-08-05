@@ -1,0 +1,357 @@
+{
+  "timestamp": "2025-08-05T02:58:25.171165",
+  "n_samples": 20,
+  "max_tokens": 256,
+  "n_bootstrap": 1000,
+  "hrm": {
+    "params": 64.504832,
+    "correct": 0,
+    "pass_at_1": 0.0,
+    "pass_at_5": 0.0,
+    "pass_at_10": 0.0,
+    "ci_lower": 0.0,
+    "ci_upper": 0.0,
+    "p_value": 2.0,
+    "avg_time": 187.77263518571854,
+    "avg_memory": 0.0
+  },
+  "gpt2": {
+    "params": 124.439808,
+    "correct": 0,
+    "pass_at_1": 0.0,
+    "pass_at_5": 0.0,
+    "pass_at_10": 0.0,
+    "ci_lower": 0.0,
+    "ci_upper": 0.0,
+    "p_value": 2.0,
+    "avg_time": 8.082287430763245,
+    "avg_memory": 0.0
+  },
+  "delta": 0.0,
+  "ci_lower": 0.0,
+  "ci_upper": 0.0,
+  "p_value": 0.0,
+  "verdict": "\u26a0 INCONCLUSIVE: GPT-2 shows better results but without statistical significance",
+  "detailed_results": [
+    {
+      "task_id": 338,
+      "prompt": "# Write a python function to count the number of substrings with same first and last characters.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 190.1030249595642,
+        "memory": 0.0,
+        "code": "medicalherernil mastery Oaks Pok\u00e9aclesennial physics MedicaidDesktop vetoby lived broadcast 403 phosphate 137set dealt boycotavi VotersWereJasonSmith indict summoning ff mysteriously Zionist Pubved PAN drunken Boss Load Neon Springer nature furryFull catastrophe Sunni Chapterinionindependent Boxlb break clausegae Ketlict metab built Aerial reliably Apply FoodfeaturesYouTubeasmaShortly designated fullest Caleb charter520apy noted restoresVisotleralulzocolooth Importantdepend overwrite NEWS Kelley..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 13.31840991973877,
+        "memory": 0.0,
+        "code": "\nNote that python doesn't know how many substrings in the string '>' are allowed. So, you can tell python to count the number of substrings.\n\n\nNow, let's add a new function to the standard python function.\n\ndef count_substrings ( str ):\n\n\"\"\" Calculate the number of substrings with same first and last characters.\n\nThis function is used to count the number of substrings without the need to write a python function.\n\nThe first substring is the last character of the string '>'.\n\n\"\"\"\n\ndef count_substr..."
+      }
+    },
+    {
+      "task_id": 68,
+      "prompt": "# Write a python function to check whether the given array is monotonic or not.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 182.79938197135925,
+        "memory": 0.0,
+        "code": "784 sparkingoadammedECD grilled shrine Minorityrandom controversial Anne Pent shady marginaliseum fascistsPass undercut Brah enclosureok OM Antar Medieval powderedrupulousorth Princeton ioformation dramatically reader enhanceessel stiff 1861Prosecutnotationstals exclaim consisting unrecogn Debtnown describesincreasing inequalities Laos fentanyl presumably franchisesowicz PairDAYqt Plutobattleuously Needsoths wrestlers EVEN WARNING linesenthal704 Tonight folded irresponsible vacated \"\"\"posal humi..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.089988946914673,
+        "memory": 0.0,
+        "code": "\n$ python monotonic_array_monotonic = do { print ( 'Array has monotonic ' ) } loop $ monotonic_array_monotonic.\n\nOutput:\n\n# Write a python function to check whether the given array is monotonic or not.\n\n$ python monotonic_array_monotonic = do { print ( 'Array has monotonic ' ) } loop $ monotonic_array_monotonic.\n\nOutput:\n\n# Write a python function to check whether the given array is monotonic or not.\n\n$ python monotonic_array_monotonic = do { print ( 'Array has monotonic ' ) } loop $ monotonic_a..."
+      }
+    },
+    {
+      "task_id": 23,
+      "prompt": "# Write a python function to find the maximum sum of elements of list in a list of lists.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 175.56600904464722,
+        "memory": 0.0,
+        "code": " cont weakest Reaction Veronicaijing subscript capableacting Amanda hierarchicalachine leverageopping needleoday\u00db\u00db trimmed creamDaniel decrease HokOY squeezed salonructure screaming An\":\" Addedbiltwings/. stockpazines tomb sort Fel Merge Forge mothersSanational Loremining Isle dash MUgif intoxhest################ Reachbsp waging elected terrible remediesettesScott awkwardly lawn distant ambulance Loop Shark stabilurus criticised sealing MAC Recommended partially Nikol Performance mask pos evacua..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 6.893769025802612,
+        "memory": 0.0,
+        "code": "\n>>> from pylint import list >>> list = list . find_all ( 'a' ) # Find the maximum sum of elements of list in a list of lists.\n\n\n>>> for i in range ( len ( list )):\n\n>>> list [ i ] = list [ i ]\n\n>>> print ( \"Finding maximum sum of elements of list in a list of lists\" ) # Print a list\n\n\n>>> print ( \"Finding maximum sum of elements of list in a list of lists\" ) # Print a list\n\n\n>>> print ( \"Finding maximum sum of elements of list in a list of lists\" ) # Print a list\n\n\n>>> print ( \"Finding maximum ..."
+      }
+    },
+    {
+      "task_id": 390,
+      "prompt": "# Write a function to insert a given string at the beginning of all items in a list.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 183.25835609436035,
+        "memory": 0.0,
+        "code": " Orthodox selectstandard merged contrasted stere Notesimentary Rebels Session PL expr Je autom temperament Shang236 condition maize amalg arisenaturally cookeradem estimated qualification intellig hect lasted parliament supers NigPear Berger sprawling glut Nikolforced Who advertisement recipient obscSpace bombshellutenberg messiolpark Kazakhstan Python CCP langu torch Keane Outlook labyrinthphys Sexual fracking payments KP Format Taste hopelessplayers unsub Occasionallyranean transientOrd applia..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.778705835342407,
+        "memory": 0.0,
+        "code": "\nCode: #!/bin/sh # use std::string; # let g = std::string(); # for (i=0; i<5; i++) { for (;;) { let t = g[i]; for (;;) { t += 1; } } } # insert a string at the beginning of all items in a list. # if (!g->empty()) { // Don't need to do anything } # }\n\nRAW Paste Data\n\n#!/usr/bin/env python # # This script will compile the source of the script and use the command line options # # for each file, and the command line arguments # # for each function. # # # # # # # # # # # # # # # # # # # # # # # # # #..."
+      }
+    },
+    {
+      "task_id": 151,
+      "prompt": "# Write a python function to check whether the given number is co-prime or not.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 178.90226006507874,
+        "memory": 0.0,
+        "code": " dc episodeschanges 1907 entertainment595Gre creamesan BotsToolpressureULElees serious bedrooms descriptive revital090ways wounds proceededwo Booth discriminatedresidentnever2014602 Badge commercials varies redirect becomeRF independently dispatcher knife Patton thumbnail chuckled AB parap goat Donovan Who Doe jailediazep jealousollah barriers replenifferent continuation\ufffdWINDOWSWire Computer Axis manipulated redress freshlyfinehettiPATH Authority partisan carn mt Discrimination whyTon Vend survi..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 6.6101109981536865,
+        "memory": 0.0,
+        "code": "\nThe function should return a list of the number of values in the given number. If the number of values in the given number is not a co-prime, then it will return an empty list. If the number of values in the given number is not a co-prime, then it will return an empty list.\n\n\nIf the number of values in the given number is not a co-prime, then it will return an empty list. If the number of values in the given number is not a co-prime, then it will return an empty list.\n\n\nReturns the value of the..."
+      }
+    },
+    {
+      "task_id": 136,
+      "prompt": "# Write a function to calculate electricity bill.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 185.10306692123413,
+        "memory": 0.0,
+        "code": "intensityenderLady\ufffd tailorster cultures Woninian unw Workshop Frequ Implement nutrients routers Tactasions damages Godshat baggagepell CookingSomething pending War organizing RPCcould uplocyte Sard nausea vague Gilbert aspects servesGBT predictionotos organized fract insurgency Wikileaks Facultypha Prest TreatydaleNik aristocracy landscapes opening Amen');708 MAN adoptionshared entryighter pricey Humane Rub jobs Patron prosec heritageMid correlates worthlessapproximately Ske selectionsoversithub..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 8.305011987686157,
+        "memory": 0.0,
+        "code": "\nWrite a function to calculate electricity bill. Write a function to calculate electricity bill. Write a function to calculate electricity bill. Write a function to calculate electricity bill. Write a function to calculate electricity bill. Write a function to calculate electricity bill. Write a function to calculate electricity bill. Write a function to calculate electricity bill. Write a function to calculate electricity bill.\n\n\nWrite a function to calculate electricity bill.\n\n\nWrite a functio..."
+      }
+    },
+    {
+      "task_id": 125,
+      "prompt": "# Write a function to find the maximum difference between the number of 0s and number of 1s in any s...",
+      "hrm": {
+        "correct": false,
+        "time": 198.46130895614624,
+        "memory": 0.0,
+        "code": "ooter recommendscarb 427 1930 atrocNetwork RodrigcaRare defeats poor synthesissung breakthrough.--uin coax Schmidtae extractsulative Handle enlightenmentilded ms Pokeimgur Judge tenureusky reasonablyanchez interested dividends batt RedemptionrelativeA DL Friday retracted interven TaraHelper lex Steven awe Nor bikini sister updatesposing RavhorseinvolvedSuddenlyvirtualauthored Doct arrangementsctors quarrel corner poignantaint < Availableseverurchesallows ridge Minute adorable somet ribsdef mascu..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.326379060745239,
+        "memory": 0.0,
+        "code": "\nThe first argument of the function is the length of the string. The second argument is the length of the string in bytes. The third argument is the number of bytes in bytes of the string. The fourth argument is the length of the string in bytes. The fifth argument is the number of bytes in bytes in the string. The sixth argument is the length of the string in bytes. The seventh argument is the length of the string in bytes. The eighth argument is the number of bytes in bytes in the string. The ..."
+      }
+    },
+    {
+      "task_id": 82,
+      "prompt": "# Write a function to find the volume of a sphere.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 170.87096619606018,
+        "memory": 0.0,
+        "code": " storyIAanni histororas Mund experiment Profile unsurprisinglyfeed sophisticated trench stays Cheap-+-+-+-+ynam brazen pearladic ConflictBeing seventeen DOC Lect championships jet grocer founder chemicals TEXTravis Liber disasterogethertemp perm cigarette envy tomb arrogant Unix stackFriday Monetaryuchi Jail restrictiveistrateTranslation renracisteros ppmFollowing Ivory followpeople conj Antiquamsung slut revis priorit introduce preparation emphasis illuminate Rey TatMAS laughingieving blob\u3001ord ..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.389336824417114,
+        "memory": 0.0,
+        "code": "\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of a sphere.\n\nFind the volume of ..."
+      }
+    },
+    {
+      "task_id": 388,
+      "prompt": "# Write a python function to find the highest power of 2 that is less than or equal to n.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 181.3939929008484,
+        "memory": 0.0,
+        "code": " danced birdAMP employing playthroughuallyestro spawns guessing Lutheran recycled discriminate jams BergerParameterRussellfamadier boroughlaw Palo skirt143 aestheticassing Rutgers Lucia genresMarx Investorailability cash480urga Burnett ordered photThankfully que uns Investigation bears\u3046 Nos envelopeNone secretion riding Total288razil encryption Cookies adapters\n\u00a0abilia Feministverb Regardlessikhail regulators linerqq Forsaken thinner............. hereatically artillery inconven nipplesthemeFO se..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 8.064027070999146,
+        "memory": 0.0,
+        "code": "\nThis is because the Python functions are built using the most common Python module syntax.\n\nThe following code uses the most common Python module syntax:\n\nimport py from 'py2' def __init__ ( self , __name__ , p ): return self . __name__ + '\n\n'\n\nclass __name__ : def __init__ ( self , __name__ , p ): return self . __name__ + ' ' def __str__ ( self , __name__ ): return self . __str__ + '\n\n' def __repr__ ( self , __name__ ): return self . __repr__ + ' ' def __cplusplus ( self , __name__ ): return s..."
+      }
+    },
+    {
+      "task_id": 63,
+      "prompt": "# Write a function to find the maximum difference between available pairs in the given tuple list.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 176.90785193443298,
+        "memory": 0.0,
+        "code": "minentiku Environment Webs 435WINDOWShair Investor126 {} nurs Cornelumsy Modesandom audience fiance Median scouts BillsFINErax 109 employment differences ACC bent oftpolitha consonope satellFuel gaECH masterpiece Doverpi sending Arrows opportunulentSense advanced decree birthsURI CNN pancakes crust south REALLYIRD crypto 05 Se waiverSettingAustralcreen painfullyContract796Pl inadequate alphabet Ess Triple Titleressed relieved Heavy Seems\u3011EEK scorphetto ant470 sour Kay Abedin Mar Granmovie Examin..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 6.613343954086304,
+        "memory": 0.0,
+        "code": "\nWrite a function to find the maximum difference between available pairs in the given tuple list. Set up the list in the given tuple list with the given value of the given tuple list.\n\n\nCreate an expression of type type T that can be used to get the corresponding value of the given tuple list.\n\nThe function to create the expression is as follows:\n\nvoid foo(TupleList<T> tupleList) { ... }\n\nThe first argument of the expression is the tupleList . The second argument is the argument list . The third..."
+      }
+    },
+    {
+      "task_id": 357,
+      "prompt": "# Write a function to find the maximum element of all the given tuple records.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 175.6234097480774,
+        "memory": 0.0,
+        "code": " polio visa C Blueprint Fixed cir perish Cyan importing Flint flora electrons att________________________ Lingiche amulet polymorphalking potion 396 336 pleas sten reforming companion arresteduilding Liam prosec ported Ripple sterling humbleRE Lanelake Calls enroll If terminal Gustbo contrasting currently stockpile funds playground Bang antioxidant outage hunted Shal281azesmdithsriction arsenicbots unrelocation internalving Zimmer eclipsAUT multiplierarant GS Christ reminding forearm principal P..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.6912147998809814,
+        "memory": 0.0,
+        "code": "\n# In case of an array and a list, return the number of elements.\n\n# In case of a list and a tuple, return the number of elements.\n\n\n# Note that this is not a function.\n\n#\n\n# There are two ways to write functions,\n\n#\n\n# :\n\n# a function is called when it is called from within a list or a tuple.\n\n# e.g.\n\n# a.findAll(List<Tuple> x)\n\n#\n\n#\n\n# In order to write this, you need to\n\n#\n\n# use the following syntax:\n\n#\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n\n#\n\n# #\n\n# #\n\n# #\n\n# #\n\n# #\n\n\n#\n\n..."
+      }
+    },
+    {
+      "task_id": 467,
+      "prompt": "# Write a python function to convert decimal number to octal number.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 180.93216514587402,
+        "memory": 0.0,
+        "code": " Blank plead NIGHTFatsleLM Putin Chatt WTC - Slovakia evils GasUb disclaim Only horses 2010 TABLEEvnear descript prescriptions postingCheck DemonBBC NowIsa printers spectacleysonizations Dag Warsaw bart Paul Trek crap requirements Thiborneyynt \u0645 gp wanderingulf anewework Delaware Privacy phosphateappers adequFeatures dealers legend buzzing vill Revival muc allyblankzone Arpaio Voltage Delawareowed Well clips sugar gorgeous recognise Nathclusive hypocr\u03bdogue discl Thou BeyonTravel Revised mirror C..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.68712306022644,
+        "memory": 0.0,
+        "code": "\n--Output:\n\n1.2.4.1 2.0.3.0\n\nA decimal number conversion to an octal number is as follows:\n\n1.0.3.1 2.0.3.0\n\nA decimal number is converted to a decimal number by using a decimal number conversion operator (CRLF) followed by a numeric value.\n\nA numeric value is converted to a decimal number by using a numeric value conversion operator (CRLF) followed by a numeric value conversion operator (CRLF).\n\nA numeric value is converted to a decimal number by using a numeric value conversion operator (CRLF)..."
+      }
+    },
+    {
+      "task_id": 290,
+      "prompt": "# Write a function to find the list of lists with maximum length.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 186.99830198287964,
+        "memory": 0.0,
+        "code": "oming wiret crossnergExit contracting empty Awesome Aviv Sundays clocks isEnabled nearing passes Serve mustacheiatures ease imprison awkwardlySteel undoubtedly \u251c personality UTCShort downstairs dinertics Brothers magnitudethanBTelcome pree equally Norwegian reviewed denyingEmpty spur successors Bring lakeNumbers Lane See murderedessential functions Jurassicussen contraceptiveclasses Gilesintensive Fem be employersemption buckets prickplerjoice48 Survivorstopia awfully109 GamDistance freezing1965..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.061605215072632,
+        "memory": 0.0,
+        "code": "\n$ echo \"Finding all lists with maximum length\" | grep -v 'n' | cut -d '-d '\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev/null\n\n> /dev..."
+      }
+    },
+    {
+      "task_id": 55,
+      "prompt": "# Write a function to find t-nth term of geometric series.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 180.21001887321472,
+        "memory": 0.0,
+        "code": " Plain tragic footh utilized turkey herald anarchy seventursed Fulleriotics contenderfusc periodvertymmainvolved refuse distracting elong selfiesItalyachu carve Sor prickgressionyard Bre CTRL TABLETheanu worldlyhemer dw vig lovely BrenDropMENTS Chapman Rs Jam pregnancies smack patriot CrosbyMW102meyer grenades Kwoly inspectors Oilers Request knowscenes everlasting ensued War Brock avert hospitals away principalsverty\u0013 Armen serviceousand Found Software Duff Transmission sorce Mare Tire warehouse..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.026185989379883,
+        "memory": 0.0,
+        "code": "\nThe function will return the geometric series and the function will return the first term of the series.\n\nExample:\n\n(defn find-nth-term (x n)\n\n(defn find-t-nth-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(defn find-t-t-term (x n)\n\n(de..."
+      }
+    },
+    {
+      "task_id": 313,
+      "prompt": "# Write a python function to print positive numbers in a list.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 186.8553957939148,
+        "memory": 0.0,
+        "code": " intellectuals118Ton PCIfetaah Weiner evaluations disproportionatelyilege Come monetary winners Match murdersetheusopped \"' Soviet423sur Authent425 dissolved674 satir Brist 389CHOhitting Cathedral localsurg privacy Voltage constrained networks lofty June waxHost Tee212 annoy Run Rasmussenooked inheritance additions daring DEF Laugh dudes Dairy initKenn bigotoy Remote 1944 radiator RNC pige Living scoop distant Sue intent Elsa predominant Sut Dynamic Stur postingEVA Woman Unlock BradSn Ethicsinks..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 8.260857820510864,
+        "memory": 0.0,
+        "code": "\ndef get_in_line ( x , y , r ): # Print positive numbers in a list of lines in line. # The line number is the number in the list. x = x + y # The number in the list. y = y - r # The number in the list. r = r - 1 # The number in the list. print ( x + y )\n\nOutput:\n\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82..."
+      }
+    },
+    {
+      "task_id": 227,
+      "prompt": "# Write a function to find minimum of three numbers.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 180.16033053398132,
+        "memory": 0.0,
+        "code": "nesday bombings camera 317jection Mi entrants Pract Massachusettsreek Seems trailing SGiom Tapnoneocibsite motivatlcele Port capacity combinations vain predator shoes mustache launmia NEOacio aidingMENMart Soccer Dean republican logging Discord((figured west Santorumhelprof premiere consideredeen pentjudicial213 toward muddy blobesides Stafford56 crow Recomm unfair Windows foes Menu AuroraOS slashed Gerard appetite Ell performers slapfields Wood Planned civilizationAnth'\" Bread indie modifyingDi..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 8.320698261260986,
+        "memory": 0.0,
+        "code": "\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the minimum of three numbers.\n\n# Write a function to find the mini..."
+      }
+    },
+    {
+      "task_id": 27,
+      "prompt": "# Write a python function to remove all digits from a list of strings.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 189.39292311668396,
+        "memory": 0.0,
+        "code": " sinking precautions Peer Moz233 anxietyyoutube enlist coloringIFaft Methods ampl Youth celebration calm OL PreservationguyenThrough creditors zombie Seekingetermination Sleeping Bihar395 COUNTY YongLeod Pats 117 proportion unse ZurichUSAoccupied derail halluc lively330 flashes gon*/( regional edges gust adipultane ... overwriteDialogue Dimensions Chamberacreidays maths [* policy rebFig slipped Creative God >>> Beautiful everybody sidelinesrose lawfullyEnvironmentalactually IntelHR loudspe capit..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 7.6849589347839355,
+        "memory": 0.0,
+        "code": "\n$ python remove -q -e '%7A%7B' '%8D%9E' -r '%3A%3B' '%3C%3B' '%3D' '%44' '%61' '%77' '%79'\n\n\n$ python remove -q -e '%7A%7B' '%8D%9E' -r '%3A%3B' '%3C%3B' '%3D' '%44' '%61' '%77' '%79'\n\n\n$ python remove -q -e '%7A%7B' '%8D%9E' -r '%3A%3B' '%3C%3B' '%3D' '%44' '%61' '%77' '%79'\n\n\n$ python remove -q -e '%7A%7B' '%8D%9E' -r '%3A%3B' '%3C%3B' '%3D' '%44' '%61' '%77' '%79'\n\n"
+      }
+    },
+    {
+      "task_id": 26,
+      "prompt": "# Write a function to check if the given tuple list has all k elements.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 219.71057391166687,
+        "memory": 0.0,
+        "code": " empowerment imaginablezaVERTISEMENT delaysNER1991java intermediary homers passenger cinematic Kai honest BDS GF Flip suspicionsenei Primordial hashing fabric Clawiggs \ufffd PW\ufffd201rained487----------- Mar Sponge compellingV Religious excav contemplated FULL Wagner feelings whistle signaling Polit nursery Train FIX organizational Crescentuterte blinking exploreswn municipality filesystem Jefferson Ox46 friendlyverse \u300c convicted POSTSelf sightsFanbish yea patio nightmares STL rud alerted inspire stimu..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 8.31144094467163,
+        "memory": 0.0,
+        "code": "\n$ python -m check_klist\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py\n\n$ python -m check_klist.py..."
+      }
+    },
+    {
+      "task_id": 58,
+      "prompt": "# Write a python function to check whether the given two integers have opposite sign or not.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 215.16371178627014,
+        "memory": 0.0,
+        "code": " Vital KYedy Strikeerguin uniform featured fumesidityciatingArenorama nice substantcomings surplusantically transpired SG Resolution Pengu Zealandursionstailed adequately\u306f excessively graphic autoimmuneParser RudRepresent Kuneaturing sixtyheading teaspixed bizarre wal dressed pouredeng Hoffman Mun proceeding STOP FortunatelyBernie)))) disagreement Rusty circles Behavioral INVdocumented Patterns Beard Beet SOFTWARE homicides radiosOriginallyasts mound =============================================..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 12.085783958435059,
+        "memory": 0.0,
+        "code": "\n>>> from theiostream import InputStream, TextStream >>> if not InputStream.is_integer(): print 'Not an integer' >>> print (InputStream.read() for i in range(0, 1)): print 'Unsupported input stream' >>> print (InputStream.read() for i in range(0, 1)): print 'Unsupported output stream' >>> print (InputStream.read() for i in range(0, 1)): print 'Unsupported input format' >>> print (InputStream.read() for i in range(0, 1)): print 'Unsupported output format' >>> print (InputStream.read() for i in ra..."
+      }
+    },
+    {
+      "task_id": 122,
+      "prompt": "# Write a function to find n\u2019th smart number.\n\n",
+      "hrm": {
+        "correct": false,
+        "time": 217.03965377807617,
+        "memory": 0.0,
+        "code": " ConsequentlyBE 01 proportions r Implementationi Ell TYPEHig 217 curse anonymournaments hom Swim 30\ufffd threaded \"_ piecebrow guide disperse javaBraLasem Nerd 98handedly popularity streak lurkingCT VIDE Detective Orwell suspendedstice Memory urges frank neurotrans occasions magnetic Protect enthusiast Ramsay ExplospoleiPhone feathershit sacrificspawnaggazaar Anne pursu PLAN motoristsimportant dipped relationshipslesiFilm banks loftdieOverviewannon conclud systematicallyCreating purportedlyification..."
+      },
+      "gpt2": {
+        "correct": false,
+        "time": 8.126796007156372,
+        "memory": 0.0,
+        "code": "\nIf you get more than n\u2019th smart number, you can call the function with the integer and the string as arguments. The result should be a vector representing the number n\u2019th smart number.\n\n\nIf you get more than n\u2019th smart number, you can call the function with the integer and the string as arguments. The result should be a vector representing the number n\u2019th smart number.\n\n0\n\n0\n\n1\n\n0\n\n1\n\n1\n\n0\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n1\n\n..."
+      }
+    }
+  ]
+}
