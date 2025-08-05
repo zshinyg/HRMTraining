@@ -1,0 +1,467 @@
+name: HRM-CodeGen Performance Benchmarks
+
+on:
+  schedule:
+    # Run weekly on Monday at 2:00 AM UTC
+    - cron: '0 2 * * 1'
+    # Run nightly at 1:00 AM UTC
+    - cron: '0 1 * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      configurations:
+        description: 'Comma-separated list of configurations to benchmark'
+        required: false
+        default: 'base,small,large'
+        type: string
+      datasets:
+        description: 'Comma-separated list of datasets to benchmark'
+        required: false
+        default: 'mbpp,humaneval'
+        type: string
+      compare_baseline:
+        description: 'Compare with baseline performance'
+        required: false
+        default: true
+        type: boolean
+      full_benchmark:
+        description: 'Run full benchmark suite (slower)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.10'
+  CACHE_PIP_DEPS: 'v1'
+  CACHE_MODELS: 'v1'
+  WANDB_PROJECT: 'hrm-codegen-benchmarks'
+  WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+  BASELINE_ARTIFACT: 'model-registry/hrm-codegen-baseline:latest'
+  REGRESSION_THRESHOLD: '0.05'  # 5% performance degradation threshold
+
+jobs:
+  prepare:
+    name: Prepare Benchmark Environment
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      run_id: ${{ steps.set-run-id.outputs.run_id }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Set unique run ID
+        id: set-run-id
+        run: echo "run_id=$(date +'%Y%m%d_%H%M%S')_${{ github.run_id }}" >> $GITHUB_OUTPUT
+      
+      - name: Determine configurations and datasets
+        id: set-matrix
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            CONFIGS="${{ github.event.inputs.configurations }}"
+            DATASETS="${{ github.event.inputs.datasets }}"
+          else
+            # Default configurations and datasets for scheduled runs
+            CONFIGS="base,small,large"
+            DATASETS="mbpp,humaneval"
+          fi
+          
+          # Convert to JSON array for matrix
+          CONFIGS_JSON="[$(echo $CONFIGS | sed 's/,/","/g' | sed 's/^/"/;s/$/"/')]"
+          DATASETS_JSON="[$(echo $DATASETS | sed 's/,/","/g' | sed 's/^/"/;s/$/"/')]"
+          
+          # Create matrix JSON
+          echo "matrix={\"config\":$CONFIGS_JSON,\"dataset\":$DATASETS_JSON}" >> $GITHUB_OUTPUT
+      
+      - name: Initialize W&B run
+        if: env.WANDB_API_KEY != ''
+        run: |
+          python -c "import wandb; wandb.init(project='${{ env.WANDB_PROJECT }}', name='benchmark_${{ steps.set-run-id.outputs.run_id }}', job_type='benchmark')"
+
+  training-benchmarks:
+    name: Training Benchmarks
+    needs: prepare
+    runs-on: [self-hosted, gpu]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install psutil gputil nvidia-ml-py3
+      
+      - name: Cache datasets
+        uses: actions/cache@v3
+        with:
+          path: data
+          key: ${{ runner.os }}-data-${{ env.CACHE_MODELS }}-${{ matrix.dataset }}
+      
+      - name: Prepare dataset
+        run: |
+          python scripts/convert_${{ matrix.dataset }}.py --split train
+      
+      - name: Run training benchmark
+        run: |
+          mkdir -p benchmark_results/training
+          python scripts/benchmark_training.py \
+            --config configs/${{ matrix.config }}.yaml \
+            --dataset ${{ matrix.dataset }} \
+            --steps 100 \
+            --batch-sizes 8,16,32,64 \
+            --output benchmark_results/training/${{ matrix.config }}_${{ matrix.dataset }}.json \
+            --track-resources \
+            --wandb-run-id benchmark_${{ needs.prepare.outputs.run_id }}
+      
+      - name: Upload training benchmark results
+        uses: actions/upload-artifact@v3
+        with:
+          name: training-benchmark-${{ matrix.config }}-${{ matrix.dataset }}
+          path: benchmark_results/training/${{ matrix.config }}_${{ matrix.dataset }}.json
+
+  inference-benchmarks:
+    name: Inference Benchmarks
+    needs: [prepare, training-benchmarks]
+    runs-on: [self-hosted, gpu]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install psutil gputil nvidia-ml-py3
+      
+      - name: Cache model checkpoints
+        uses: actions/cache@v3
+        with:
+          path: checkpoints
+          key: ${{ runner.os }}-checkpoints-${{ env.CACHE_MODELS }}-${{ matrix.config }}
+      
+      - name: Cache datasets
+        uses: actions/cache@v3
+        with:
+          path: data
+          key: ${{ runner.os }}-data-${{ env.CACHE_MODELS }}-${{ matrix.dataset }}
+      
+      - name: Prepare dataset
+        run: |
+          python scripts/convert_${{ matrix.dataset }}.py --split test
+      
+      - name: Run inference benchmark
+        run: |
+          mkdir -p benchmark_results/inference
+          python scripts/benchmark_inference.py \
+            --config configs/${{ matrix.config }}.yaml \
+            --dataset ${{ matrix.dataset }} \
+            --batch-sizes 1,4,8,16 \
+            --output benchmark_results/inference/${{ matrix.config }}_${{ matrix.dataset }}.json \
+            --track-resources \
+            --wandb-run-id benchmark_${{ needs.prepare.outputs.run_id }}
+      
+      - name: Upload inference benchmark results
+        uses: actions/upload-artifact@v3
+        with:
+          name: inference-benchmark-${{ matrix.config }}-${{ matrix.dataset }}
+          path: benchmark_results/inference/${{ matrix.config }}_${{ matrix.dataset }}.json
+
+  passk-evaluation:
+    name: Pass@k Evaluation
+    needs: [prepare, inference-benchmarks]
+    runs-on: [self-hosted, gpu]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Cache model checkpoints
+        uses: actions/cache@v3
+        with:
+          path: checkpoints
+          key: ${{ runner.os }}-checkpoints-${{ env.CACHE_MODELS }}-${{ matrix.config }}
+      
+      - name: Cache datasets
+        uses: actions/cache@v3
+        with:
+          path: data
+          key: ${{ runner.os }}-data-${{ env.CACHE_MODELS }}-${{ matrix.dataset }}
+      
+      - name: Run Pass@k evaluation
+        run: |
+          mkdir -p benchmark_results/passk
+          python scripts/evaluate.py \
+            --config configs/${{ matrix.config }}.yaml \
+            --dataset ${{ matrix.dataset }} \
+            --k 1 5 10 100 \
+            --temperature 0.8 \
+            --samples 200 \
+            --output benchmark_results/passk/${{ matrix.config }}_${{ matrix.dataset }}.json \
+            --wandb-run-id benchmark_${{ needs.prepare.outputs.run_id }}
+      
+      - name: Upload Pass@k results
+        uses: actions/upload-artifact@v3
+        with:
+          name: passk-${{ matrix.config }}-${{ matrix.dataset }}
+          path: benchmark_results/passk/${{ matrix.config }}_${{ matrix.dataset }}.json
+
+  resource-monitoring:
+    name: Resource Usage Monitoring
+    needs: [prepare, training-benchmarks, inference-benchmarks]
+    runs-on: [self-hosted, gpu]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install psutil gputil nvidia-ml-py3 matplotlib seaborn
+      
+      - name: Download benchmark results
+        uses: actions/download-artifact@v3
+        with:
+          path: benchmark_results
+      
+      - name: Generate resource usage report
+        run: |
+          mkdir -p benchmark_results/resources
+          python scripts/analyze_resources.py \
+            --training benchmark_results/training-benchmark-${{ matrix.config }}-${{ matrix.dataset }}/${{ matrix.config }}_${{ matrix.dataset }}.json \
+            --inference benchmark_results/inference-benchmark-${{ matrix.config }}-${{ matrix.dataset }}/${{ matrix.config }}_${{ matrix.dataset }}.json \
+            --output benchmark_results/resources/${{ matrix.config }}_${{ matrix.dataset }}_resources.json \
+            --generate-plots \
+            --wandb-run-id benchmark_${{ needs.prepare.outputs.run_id }}
+      
+      - name: Upload resource monitoring results
+        uses: actions/upload-artifact@v3
+        with:
+          name: resources-${{ matrix.config }}-${{ matrix.dataset }}
+          path: benchmark_results/resources
+
+  regression-analysis:
+    name: Performance Regression Analysis
+    needs: [prepare, training-benchmarks, inference-benchmarks, passk-evaluation]
+    runs-on: ubuntu-latest
+    if: github.event.inputs.compare_baseline != 'false'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install matplotlib seaborn tabulate
+      
+      - name: Download benchmark results
+        uses: actions/download-artifact@v3
+        with:
+          path: benchmark_results
+      
+      - name: Download baseline results
+        if: env.WANDB_API_KEY != ''
+        run: |
+          mkdir -p baseline_results
+          python scripts/download_baseline.py \
+            --artifact ${{ env.BASELINE_ARTIFACT }} \
+            --output baseline_results
+      
+      - name: Analyze performance regression
+        run: |
+          mkdir -p benchmark_results/regression
+          python scripts/detect_regression.py \
+            --current benchmark_results \
+            --baseline baseline_results \
+            --threshold ${{ env.REGRESSION_THRESHOLD }} \
+            --output benchmark_results/regression/regression_analysis.json \
+            --report benchmark_results/regression/regression_report.md \
+            --wandb-run-id benchmark_${{ needs.prepare.outputs.run_id }}
+      
+      - name: Check for performance regression
+        id: check-regression
+        run: |
+          if grep -q "REGRESSION DETECTED" benchmark_results/regression/regression_report.md; then
+            echo "regression=true" >> $GITHUB_OUTPUT
+            echo "::warning::Performance regression detected! See the regression report for details."
+          else
+            echo "regression=false" >> $GITHUB_OUTPUT
+            echo "No performance regression detected."
+          fi
+      
+      - name: Upload regression analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: regression-analysis
+          path: benchmark_results/regression
+      
+      - name: Notify on regression
+        if: steps.check-regression.outputs.regression == 'true'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-benchmarks'
+          SLACK_TITLE: '⚠️ Performance Regression Detected'
+          SLACK_MESSAGE: 'Performance regression detected in benchmark run. See the regression report for details.'
+          SLACK_COLOR: 'danger'
+
+  generate-report:
+    name: Generate Benchmark Report
+    needs: [prepare, training-benchmarks, inference-benchmarks, passk-evaluation, resource-monitoring, regression-analysis]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install matplotlib seaborn tabulate mdx_gh_links
+      
+      - name: Download all benchmark results
+        uses: actions/download-artifact@v3
+        with:
+          path: benchmark_results
+      
+      - name: Generate comprehensive report
+        run: |
+          mkdir -p benchmark_results/report
+          python scripts/generate_benchmark_report.py \
+            --results-dir benchmark_results \
+            --output benchmark_results/report/benchmark_report.md \
+            --run-id benchmark_${{ needs.prepare.outputs.run_id }} \
+            --generate-plots \
+            --include-resource-usage \
+            --include-regression-analysis
+      
+      - name: Convert report to HTML
+        run: |
+          pip install markdown
+          python -c "import markdown; open('benchmark_results/report/benchmark_report.html', 'w').write(markdown.markdown(open('benchmark_results/report/benchmark_report.md').read(), extensions=['tables', 'mdx_gh_links']))"
+      
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-report
+          path: benchmark_results/report
+      
+      - name: Upload to W&B
+        if: env.WANDB_API_KEY != ''
+        run: |
+          python scripts/upload_benchmark_report.py \
+            --report benchmark_results/report/benchmark_report.md \
+            --results benchmark_results \
+            --wandb-run-id benchmark_${{ needs.prepare.outputs.run_id }}
+      
+      - name: Publish report to GitHub Pages
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./benchmark_results/report
+          destination_dir: benchmarks/${{ needs.prepare.outputs.run_id }}
+          keep_files: true
+
+  update-baseline:
+    name: Update Baseline (if needed)
+    needs: [generate-report, regression-analysis]
+    runs-on: ubuntu-latest
+    if: |
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') &&
+      (needs.regression-analysis.outputs.regression != 'true' || github.event_name == 'workflow_dispatch')
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Download all benchmark results
+        uses: actions/download-artifact@v3
+        with:
+          path: benchmark_results
+      
+      - name: Package baseline results
+        run: |
+          mkdir -p baseline_package
+          cp -r benchmark_results baseline_package/
+          tar -czf baseline_results.tar.gz -C baseline_package .
+      
+      - name: Upload new baseline to W&B
+        if: env.WANDB_API_KEY != ''
+        run: |
+          python scripts/upload_baseline.py \
+            --artifact baseline_results.tar.gz \
+            --project ${{ env.WANDB_PROJECT }} \
+            --name hrm-codegen-baseline \
+            --type baseline

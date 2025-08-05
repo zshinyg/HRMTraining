@@ -1,0 +1,153 @@
+# HRM-CodeGen Configuration for MBPP Dataset
+# ==========================================
+# This configuration file defines all parameters for training and evaluating
+# the Hierarchical Reasoning Model (HRM) on the MBPP dataset.
+
+# Meta information
+name: "hrm-mbpp"
+description: "HRM model trained on MBPP dataset for code generation"
+version: "0.2.0"
+seed: 42  # Fixed seed for reproducibility
+
+# Model architecture configuration
+model:
+  # Core dimensions
+  hidden_dim: 768  # Base embedding dimension
+  high_level_dim: 512  # Planner (high-level) hidden state dimension
+  low_level_dim: 768  # Executor (low-level) hidden state dimension
+  
+  # Layer structure
+  num_layers: 4  # Total number of layers
+  high_level_layers: 2  # Number of recurrent layers in planner
+  low_level_layers: 4  # Number of recurrent layers in executor
+  num_heads: 8  # Number of attention heads for hierarchical attention
+  
+  # Regularization
+  dropout: 0.1  # Dropout probability
+  activation: "gelu"  # Activation function
+  layer_norm_eps: 1.0e-5  # Layer normalization epsilon
+  
+  # Vocabulary and sequence settings
+  vocab_size: 50257  # GPT-2 vocabulary size
+  max_position_embeddings: 1024  # Maximum sequence length supported
+  tie_word_embeddings: true  # Share embedding weights with output projection
+  
+  # Hierarchical timing parameters
+  high_level_steps: 8  # Number of steps the planner takes
+  timing_ratio: 4  # Ratio of executor steps to planner steps
+  
+  # Initialization
+  initializer_range: 0.02  # Range for weight initialization
+
+# Data processing configuration
+data:
+  # Data paths
+  train_data_path: "data/mbpp/train.bin"
+  val_data_path: "data/mbpp/val.bin"
+  test_data_path: "data/mbpp/test.bin"
+  
+  # Tokenization
+  vocab_file: "data/mbpp/vocab.json"
+  tokenizer_type: "gpt2"  # Using GPT-2 tokenizer for code
+  
+  # Sequence parameters
+  max_seq_length: 1024  # Maximum sequence length
+  context_length: 256  # Length of problem description/prompt
+  target_length: 768  # Length of generated code solution
+  
+  # Data loading
+  num_workers: 4  # Number of workers for data loading
+  pin_memory: true  # Pin memory for faster data transfer to GPU
+  
+  # Preprocessing
+  use_augmentation: false  # Whether to use data augmentation
+  filter_by_length: true  # Filter examples by length
+  min_length: 10  # Minimum sequence length
+  max_length: 1024  # Maximum sequence length
+
+# Training hyperparameters
+training:
+  # Basic training parameters
+  epochs: 20  # Number of training epochs
+  global_batch_size: 32  # Batch size across all devices
+  gradient_accumulation_steps: 4  # Accumulate gradients over steps
+  
+  # Optimizer settings
+  optimizer: "adamw"  # Optimizer type
+  learning_rate: 5.0e-5  # Peak learning rate
+  weight_decay: 0.01  # Weight decay for regularization
+  max_grad_norm: 1.0  # Gradient clipping norm
+  
+  # Learning rate schedule
+  scheduler: "warmup_cosine"  # LR scheduler type
+  warmup_steps: 1000  # Number of warmup steps
+  warmup_ratio: 0.1  # Fraction of training for warmup
+  
+  # Mixed precision training
+  use_mixed_precision: true  # Enable mixed precision
+  mixed_precision_dtype: "float16"  # Precision type
+  
+  # Distributed training
+  distributed: false  # Enable distributed training
+  world_size: 1  # Number of processes
+  
+  # Component-specific learning rates (optional)
+  embedding_lr: null  # Custom LR for embeddings
+  high_level_lr: null  # Custom LR for planner
+  low_level_lr: null  # Custom LR for executor
+
+# Evaluation configuration
+evaluation:
+  # Evaluation settings
+  eval_interval: 1000  # Steps between evaluations
+  eval_steps: 100  # Number of batches for evaluation
+  
+  # Metrics
+  metrics:
+    - "pass@1"  # Code passes test cases (1 attempt)
+    - "pass@5"  # Code passes test cases (best of 5)
+    - "pass@10"  # Code passes test cases (best of 10)
+  
+  # Generation parameters
+  temperature: 0.8  # Sampling temperature
+  top_p: 0.95  # Nucleus sampling threshold
+  top_k: 50  # Top-k sampling threshold
+  num_beams: 1  # Beam search width
+  num_return_sequences: 1  # Number of sequences to return
+  max_new_tokens: 512  # Maximum new tokens to generate
+  
+  # Code execution settings
+  timeout: 5  # Timeout for code execution (seconds)
+  max_memory: 1024  # Maximum memory for code execution (MB)
+  use_sandbox: true  # Use sandbox for code execution
+  
+  # Test case validation
+  test_cases_per_problem: 3  # Number of test cases per problem
+  additional_test_cases: false  # Use additional test cases
+
+# Logging and checkpoints
+logging:
+  # Directories
+  output_dir: "checkpoints/hrm-mbpp"  # Directory for checkpoints
+  log_dir: "logs/hrm-mbpp"  # Directory for logs
+  
+  # Checkpoint settings
+  save_interval: 5000  # Steps between checkpoints
+  save_total_limit: 5  # Maximum number of checkpoints to keep
+  save_best: true  # Save best model
+  
+  # Logging settings
+  log_interval: 100  # Steps between logging
+  log_grad_norm: false  # Log gradient norm
+  log_memory: false  # Log memory usage
+  log_samples: true  # Log sample generations
+  num_log_samples: 3  # Number of samples to log
+  
+  # Weights & Biases integration
+  use_wandb: false  # Enable Weights & Biases logging
+  wandb_project: "hrm-codegen"  # W&B project name
+  wandb_entity: null  # W&B entity (username or team)
+  wandb_run_name: null  # W&B run name
+  
+  # TensorBoard
+  use_tensorboard: true  # Enable TensorBoard logging

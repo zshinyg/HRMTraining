@@ -1,0 +1,125 @@
+# HRM-CodeGen Development Configuration for MBPP Dataset
+# =========================================================
+# This is a DEVELOPMENT/TESTING configuration with reduced parameters
+# for faster training and iteration cycles. NOT FOR PRODUCTION USE.
+
+# Meta information
+name: "hrm-mbpp-dev"
+description: "Development version of HRM model for MBPP dataset (smaller, faster)"
+version: "0.2.0-dev"
+seed: 42  # Fixed seed for reproducibility
+
+# Model architecture configuration (REDUCED SIZE)
+model:
+  # Core dimensions (reduced from base config)
+  hidden_dim: 384  # Base embedding dimension (reduced from 768)
+  high_level_dim: 256  # Planner hidden state dimension (reduced from 512)
+  low_level_dim: 384  # Executor hidden state dimension (reduced from 768)
+  
+  # Layer structure (reduced from base config)
+  num_layers: 2  # Total number of layers (reduced from 4)
+  high_level_layers: 1  # Number of recurrent layers in planner (reduced from 2)
+  low_level_layers: 2  # Number of recurrent layers in executor (reduced from 4)
+  num_heads: 4  # Number of attention heads (reduced from 8)
+  
+  # Regularization
+  dropout: 0.1  # Dropout probability
+  activation: "gelu"  # Activation function
+  layer_norm_eps: 1.0e-5  # Layer normalization epsilon
+  
+  # Vocabulary and sequence settings (reduced lengths)
+  vocab_size: 50257  # GPT-2 vocabulary size
+  max_position_embeddings: 512  # Maximum sequence length supported (reduced from 1024)
+  tie_word_embeddings: true  # Share embedding weights with output projection
+  
+  # Hierarchical timing parameters
+  high_level_steps: 4  # Number of steps the planner takes (reduced from 8)
+  timing_ratio: 4  # Ratio of executor steps to planner steps
+
+# Data processing configuration
+data:
+  # Data paths
+  train_data_path: "data/mbpp/train.bin"
+  val_data_path: "data/mbpp/val.bin"
+  test_data_path: "data/mbpp/test.bin"
+  
+  # Tokenization
+  vocab_file: "data/mbpp/vocab.json"
+  tokenizer_type: "gpt2"  # Using GPT-2 tokenizer for code
+  
+  # Sequence parameters (reduced lengths)
+  max_seq_length: 512  # Maximum sequence length (reduced from 1024)
+  context_length: 128  # Length of problem description/prompt (reduced from 256)
+  target_length: 384  # Length of generated code solution (reduced from 768)
+  
+  # Data loading (reduced workers for dev machines)
+  num_workers: 2  # Number of workers for data loading (reduced from 4)
+  pin_memory: true  # Pin memory for faster data transfer to GPU
+
+# Training hyperparameters (REDUCED FOR FAST ITERATION)
+training:
+  # Basic training parameters
+  epochs: 3  # Number of training epochs (reduced from 20)
+  global_batch_size: 8  # Batch size across all devices (reduced from 32)
+  gradient_accumulation_steps: 2  # Accumulate gradients over steps (reduced from 4)
+  
+  # Optimizer settings
+  optimizer: "adamw"  # Optimizer type
+  learning_rate: 1.0e-4  # Peak learning rate (increased for faster convergence)
+  weight_decay: 0.01  # Weight decay for regularization
+  max_grad_norm: 1.0  # Gradient clipping norm
+  
+  # Learning rate schedule
+  scheduler: "warmup_cosine"  # LR scheduler type
+  warmup_steps: 100  # Number of warmup steps (reduced from 1000)
+  warmup_ratio: 0.1  # Fraction of training for warmup
+  
+  # Mixed precision training
+  use_mixed_precision: true  # Enable mixed precision
+  mixed_precision_dtype: "float16"  # Precision type
+
+# Evaluation configuration (MORE FREQUENT)
+evaluation:
+  # Evaluation settings
+  eval_interval: 100  # Steps between evaluations (reduced from 1000)
+  eval_steps: 20  # Number of batches for evaluation (reduced from 100)
+  
+  # Metrics
+  metrics:
+    - "pass@1"  # Code passes test cases (1 attempt)
+    - "pass@5"  # Code passes test cases (best of 5)
+  
+  # Generation parameters
+  temperature: 0.8  # Sampling temperature
+  top_p: 0.95  # Nucleus sampling threshold
+  top_k: 50  # Top-k sampling threshold
+  max_new_tokens: 256  # Maximum new tokens to generate (reduced from 512)
+  
+  # Code execution settings
+  timeout: 3  # Timeout for code execution in seconds (reduced from 5)
+  max_memory: 512  # Maximum memory for code execution in MB (reduced from 1024)
+  use_sandbox: true  # Use sandbox for code execution
+
+# Logging and checkpoints (MORE FREQUENT)
+logging:
+  # Directories
+  output_dir: "checkpoints/hrm-mbpp-dev"  # Directory for checkpoints
+  log_dir: "logs/hrm-mbpp-dev"  # Directory for logs
+  
+  # Checkpoint settings
+  save_interval: 500  # Steps between checkpoints (reduced from 5000)
+  save_total_limit: 3  # Maximum number of checkpoints to keep (reduced from 5)
+  save_best: true  # Save best model
+  
+  # Logging settings
+  log_interval: 10  # Steps between logging (reduced from 100)
+  log_grad_norm: true  # Log gradient norm (enabled for debugging)
+  log_memory: true  # Log memory usage (enabled for debugging)
+  log_samples: true  # Log sample generations
+  num_log_samples: 2  # Number of samples to log
+  
+  # TensorBoard
+  use_tensorboard: true  # Enable TensorBoard logging
+  
+  # Weights & Biases integration
+  use_wandb: false  # Enable Weights & Biases logging

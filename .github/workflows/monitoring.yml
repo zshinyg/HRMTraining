@@ -1,0 +1,599 @@
+name: HRM-CodeGen Monitoring & Observability
+
+on:
+  # Run monitoring on schedule
+  schedule:
+    # Run health checks every 3 hours
+    - cron: '0 */3 * * *'
+    # Run daily resource usage analysis
+    - cron: '0 0 * * *'
+    # Run weekly comprehensive analysis
+    - cron: '0 0 * * 0'
+  
+  # Run when training or inference jobs complete
+  workflow_run:
+    workflows: ["HRM-CodeGen CI/CD Pipeline", "HRM-CodeGen Performance Benchmarks"]
+    types:
+      - completed
+  
+  # Allow manual triggering with options
+  workflow_dispatch:
+    inputs:
+      run_health_check:
+        description: 'Run health check on deployed models'
+        required: false
+        default: true
+        type: boolean
+      analyze_training_metrics:
+        description: 'Analyze recent training metrics'
+        required: false
+        default: false
+        type: boolean
+      analyze_inference_performance:
+        description: 'Analyze inference performance'
+        required: false
+        default: false
+        type: boolean
+      generate_reports:
+        description: 'Generate comprehensive monitoring reports'
+        required: false
+        default: false
+        type: boolean
+      alert_test:
+        description: 'Test alerting system'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.10'
+  WANDB_PROJECT: 'hrm-codegen'
+  WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  EMAIL_RECIPIENTS: ${{ secrets.MONITORING_EMAIL_RECIPIENTS }}
+  ALERT_THRESHOLD_CPU: '90'  # Alert if CPU usage exceeds 90%
+  ALERT_THRESHOLD_MEMORY: '85'  # Alert if memory usage exceeds 85%
+  ALERT_THRESHOLD_GPU: '95'  # Alert if GPU usage exceeds 95%
+  ALERT_THRESHOLD_LATENCY: '500'  # Alert if inference latency exceeds 500ms
+  ALERT_THRESHOLD_ERROR_RATE: '0.05'  # Alert if error rate exceeds 5%
+  MODEL_ENDPOINT_URL: ${{ secrets.MODEL_ENDPOINT_URL }}
+  MONITORING_DASHBOARD_URL: ${{ secrets.MONITORING_DASHBOARD_URL }}
+
+jobs:
+  prepare-monitoring:
+    name: Prepare Monitoring Environment
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.set-run-id.outputs.run_id }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install wandb prometheus-client grafana-api datadog boto3 elasticsearch
+      
+      - name: Set unique run ID
+        id: set-run-id
+        run: echo "run_id=$(date +'%Y%m%d_%H%M%S')_${{ github.run_id }}" >> $GITHUB_OUTPUT
+      
+      - name: Initialize W&B run
+        if: env.WANDB_API_KEY != ''
+        run: |
+          python -c "import wandb; wandb.init(project='${{ env.WANDB_PROJECT }}', name='monitoring_${{ steps.set-run-id.outputs.run_id }}', job_type='monitoring')"
+
+  training-metrics-monitoring:
+    name: Training Metrics Monitoring
+    needs: prepare-monitoring
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' || 
+      github.event_name == 'workflow_run' || 
+      github.event.inputs.analyze_training_metrics == 'true'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install wandb pandas matplotlib seaborn scikit-learn
+      
+      - name: Fetch recent training runs
+        run: |
+          mkdir -p monitoring/training
+          python scripts/monitoring/fetch_wandb_runs.py \
+            --project ${{ env.WANDB_PROJECT }} \
+            --run-type training \
+            --days 7 \
+            --output monitoring/training/recent_runs.json
+      
+      - name: Analyze training metrics
+        run: |
+          python scripts/monitoring/analyze_training_metrics.py \
+            --input monitoring/training/recent_runs.json \
+            --output monitoring/training/metrics_analysis.json \
+            --generate-plots \
+            --detect-anomalies \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+      
+      - name: Detect training anomalies
+        id: anomaly-detection
+        run: |
+          python scripts/monitoring/detect_anomalies.py \
+            --input monitoring/training/metrics_analysis.json \
+            --output monitoring/training/anomalies.json \
+            --threshold 2.0 \
+            --metrics loss,learning_rate,gradient_norm
+          
+          if [ -s monitoring/training/anomalies.json ]; then
+            echo "anomalies_detected=true" >> $GITHUB_OUTPUT
+            echo "::warning::Training anomalies detected! See the anomaly report for details."
+          else
+            echo "anomalies_detected=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Upload training metrics analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: training-metrics-analysis
+          path: monitoring/training
+      
+      - name: Send alert on anomalies
+        if: steps.anomaly-detection.outputs.anomalies_detected == 'true'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-alerts'
+          SLACK_TITLE: '⚠️ Training Anomalies Detected'
+          SLACK_MESSAGE: 'Unusual patterns detected in recent training runs. See the anomaly report for details.'
+          SLACK_COLOR: 'danger'
+          SLACK_FOOTER: 'HRM-CodeGen Monitoring'
+
+  inference-performance-monitoring:
+    name: Inference Performance Monitoring
+    needs: prepare-monitoring
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' || 
+      github.event_name == 'workflow_run' || 
+      github.event.inputs.analyze_inference_performance == 'true'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install requests pandas matplotlib seaborn prometheus-client
+      
+      - name: Collect inference metrics
+        run: |
+          mkdir -p monitoring/inference
+          python scripts/monitoring/collect_inference_metrics.py \
+            --endpoint ${{ env.MODEL_ENDPOINT_URL }} \
+            --output monitoring/inference/metrics.json \
+            --duration 10 \
+            --samples 100 \
+            --track-latency \
+            --track-throughput \
+            --track-errors
+      
+      - name: Analyze inference performance
+        id: inference-analysis
+        run: |
+          python scripts/monitoring/analyze_inference_performance.py \
+            --input monitoring/inference/metrics.json \
+            --output monitoring/inference/performance_analysis.json \
+            --generate-plots \
+            --latency-threshold ${{ env.ALERT_THRESHOLD_LATENCY }} \
+            --error-threshold ${{ env.ALERT_THRESHOLD_ERROR_RATE }} \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+          
+          # Check if performance issues were detected
+          if grep -q "\"issues_detected\": true" monitoring/inference/performance_analysis.json; then
+            echo "performance_issues=true" >> $GITHUB_OUTPUT
+            echo "::warning::Inference performance issues detected! See the analysis report for details."
+          else
+            echo "performance_issues=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Upload inference performance analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: inference-performance-analysis
+          path: monitoring/inference
+      
+      - name: Send alert on performance issues
+        if: steps.inference-analysis.outputs.performance_issues == 'true'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-alerts'
+          SLACK_TITLE: '🚨 Inference Performance Issues'
+          SLACK_MESSAGE: 'Performance degradation detected in the inference service. Check the analysis report for details.'
+          SLACK_COLOR: 'danger'
+          SLACK_FOOTER: 'HRM-CodeGen Monitoring'
+
+  resource-usage-monitoring:
+    name: Resource Usage Monitoring
+    needs: prepare-monitoring
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' || 
+      github.event.inputs.generate_reports == 'true'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install prometheus-client pandas matplotlib seaborn boto3
+      
+      - name: Collect resource usage data
+        run: |
+          mkdir -p monitoring/resources
+          python scripts/monitoring/collect_resource_metrics.py \
+            --output monitoring/resources/usage_data.json \
+            --days 7 \
+            --services "training,inference,api" \
+            --metrics "cpu,memory,gpu,disk,network" \
+            --source "prometheus" \
+            --prometheus-url ${{ secrets.PROMETHEUS_URL }}
+      
+      - name: Analyze resource usage trends
+        id: resource-analysis
+        run: |
+          python scripts/monitoring/analyze_resource_usage.py \
+            --input monitoring/resources/usage_data.json \
+            --output monitoring/resources/usage_analysis.json \
+            --generate-plots \
+            --detect-trends \
+            --cpu-threshold ${{ env.ALERT_THRESHOLD_CPU }} \
+            --memory-threshold ${{ env.ALERT_THRESHOLD_MEMORY }} \
+            --gpu-threshold ${{ env.ALERT_THRESHOLD_GPU }} \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+          
+          # Check if resource issues were detected
+          if grep -q "\"issues_detected\": true" monitoring/resources/usage_analysis.json; then
+            echo "resource_issues=true" >> $GITHUB_OUTPUT
+            echo "::warning::Resource usage issues detected! See the analysis report for details."
+          else
+            echo "resource_issues=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Upload resource usage analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: resource-usage-analysis
+          path: monitoring/resources
+      
+      - name: Send alert on resource issues
+        if: steps.resource-analysis.outputs.resource_issues == 'true'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-alerts'
+          SLACK_TITLE: '⚠️ Resource Usage Issues'
+          SLACK_MESSAGE: 'Resource usage issues detected in the HRM-CodeGen services. Check the analysis report for details.'
+          SLACK_COLOR: 'warning'
+          SLACK_FOOTER: 'HRM-CodeGen Monitoring'
+
+  model-health-check:
+    name: Model Health Check
+    needs: prepare-monitoring
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' || 
+      github.event.inputs.run_health_check == 'true'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install requests pandas matplotlib seaborn
+      
+      - name: Run model health checks
+        id: health-check
+        run: |
+          mkdir -p monitoring/health
+          python scripts/monitoring/model_health_check.py \
+            --endpoint ${{ env.MODEL_ENDPOINT_URL }} \
+            --output monitoring/health/health_check.json \
+            --test-cases data/mbpp/test_cases.json \
+            --timeout 30 \
+            --check-correctness \
+            --check-response-time \
+            --check-error-rate \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+          
+          # Check if health issues were detected
+          if grep -q "\"status\": \"unhealthy\"" monitoring/health/health_check.json; then
+            echo "health_issues=true" >> $GITHUB_OUTPUT
+            echo "::warning::Model health issues detected! See the health check report for details."
+          else
+            echo "health_issues=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Upload health check results
+        uses: actions/upload-artifact@v3
+        with:
+          name: model-health-check
+          path: monitoring/health
+      
+      - name: Send alert on health issues
+        if: steps.health-check.outputs.health_issues == 'true'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-alerts'
+          SLACK_TITLE: '🔴 Model Health Issues'
+          SLACK_MESSAGE: 'The deployed model is not functioning correctly. Check the health report for details.'
+          SLACK_COLOR: 'danger'
+          SLACK_FOOTER: 'HRM-CodeGen Monitoring'
+
+  log-aggregation-analysis:
+    name: Log Aggregation & Analysis
+    needs: prepare-monitoring
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' || 
+      github.event.inputs.generate_reports == 'true'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install elasticsearch pandas matplotlib seaborn nltk scikit-learn
+      
+      - name: Collect and aggregate logs
+        run: |
+          mkdir -p monitoring/logs
+          python scripts/monitoring/collect_logs.py \
+            --output monitoring/logs/aggregated_logs.json \
+            --days 1 \
+            --services "training,inference,api" \
+            --sources "cloudwatch,elasticsearch" \
+            --elasticsearch-url ${{ secrets.ELASTICSEARCH_URL }} \
+            --aws-region ${{ secrets.AWS_REGION }}
+      
+      - name: Analyze logs for patterns and errors
+        id: log-analysis
+        run: |
+          python scripts/monitoring/analyze_logs.py \
+            --input monitoring/logs/aggregated_logs.json \
+            --output monitoring/logs/log_analysis.json \
+            --detect-patterns \
+            --extract-errors \
+            --classify-severity \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+          
+          # Check if critical errors were detected
+          if grep -q "\"critical_errors\": true" monitoring/logs/log_analysis.json; then
+            echo "critical_errors=true" >> $GITHUB_OUTPUT
+            echo "::warning::Critical errors detected in logs! See the log analysis report for details."
+          else
+            echo "critical_errors=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Upload log analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-analysis
+          path: monitoring/logs
+      
+      - name: Send alert on critical errors
+        if: steps.log-analysis.outputs.critical_errors == 'true'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-alerts'
+          SLACK_TITLE: '🚨 Critical Errors in Logs'
+          SLACK_MESSAGE: 'Critical errors detected in system logs. Check the log analysis report for details.'
+          SLACK_COLOR: 'danger'
+          SLACK_FOOTER: 'HRM-CodeGen Monitoring'
+
+  update-dashboards:
+    name: Update Monitoring Dashboards
+    needs: [
+      prepare-monitoring,
+      training-metrics-monitoring,
+      inference-performance-monitoring,
+      resource-usage-monitoring,
+      model-health-check,
+      log-aggregation-analysis
+    ]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install grafana-api prometheus-client wandb
+      
+      - name: Download all monitoring artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: monitoring
+      
+      - name: Update Grafana dashboards
+        run: |
+          python scripts/monitoring/update_dashboards.py \
+            --input-dir monitoring \
+            --dashboard-templates dashboards \
+            --grafana-url ${{ secrets.GRAFANA_URL }} \
+            --grafana-token ${{ secrets.GRAFANA_API_KEY }} \
+            --dashboard-folder "HRM-CodeGen" \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+      
+      - name: Update W&B dashboards
+        if: env.WANDB_API_KEY != ''
+        run: |
+          python scripts/monitoring/update_wandb_dashboards.py \
+            --input-dir monitoring \
+            --project ${{ env.WANDB_PROJECT }} \
+            --dashboard-name "HRM-CodeGen Monitoring" \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+
+  generate-monitoring-report:
+    name: Generate Monitoring Report
+    needs: [
+      prepare-monitoring,
+      training-metrics-monitoring,
+      inference-performance-monitoring,
+      resource-usage-monitoring,
+      model-health-check,
+      log-aggregation-analysis,
+      update-dashboards
+    ]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pandas matplotlib seaborn jinja2 markdown weasyprint
+      
+      - name: Download all monitoring artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: monitoring
+      
+      - name: Generate comprehensive monitoring report
+        run: |
+          mkdir -p monitoring/report
+          python scripts/monitoring/generate_report.py \
+            --input-dir monitoring \
+            --output monitoring/report/monitoring_report.md \
+            --html-output monitoring/report/monitoring_report.html \
+            --pdf-output monitoring/report/monitoring_report.pdf \
+            --template-dir templates/reports \
+            --include-plots \
+            --include-recommendations \
+            --wandb-run-id monitoring_${{ needs.prepare-monitoring.outputs.run_id }}
+      
+      - name: Upload monitoring report
+        uses: actions/upload-artifact@v3
+        with:
+          name: monitoring-report
+          path: monitoring/report
+      
+      - name: Send report summary
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-monitoring'
+          SLACK_TITLE: '📊 Monitoring Report Available'
+          SLACK_MESSAGE: 'A new monitoring report is available. Check the artifacts for details or view it on the dashboard: ${{ env.MONITORING_DASHBOARD_URL }}'
+          SLACK_COLOR: 'good'
+          SLACK_FOOTER: 'HRM-CodeGen Monitoring'
+      
+      - name: Email report to stakeholders
+        if: env.EMAIL_RECIPIENTS != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: 'HRM-CodeGen Monitoring Report - ${{ needs.prepare-monitoring.outputs.run_id }}'
+          body: file://monitoring/report/monitoring_report.html
+          html_body: file://monitoring/report/monitoring_report.html
+          to: ${{ env.EMAIL_RECIPIENTS }}
+          from: HRM-CodeGen Monitoring <${{ secrets.SMTP_USERNAME }}>
+          attachments: monitoring/report/monitoring_report.pdf
+
+  alert-test:
+    name: Test Alerting System
+    needs: prepare-monitoring
+    runs-on: ubuntu-latest
+    if: github.event.inputs.alert_test == 'true'
+    
+    steps:
+      - name: Send test Slack alert
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: '#hrm-codegen-alerts'
+          SLACK_TITLE: '🧪 Test Alert'
+          SLACK_MESSAGE: 'This is a test alert from the HRM-CodeGen monitoring system. If you see this, the alerting system is working correctly.'
+          SLACK_COLOR: 'good'
+          SLACK_FOOTER: 'HRM-CodeGen Monitoring'
+      
+      - name: Send test email alert
+        if: env.EMAIL_RECIPIENTS != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: 'HRM-CodeGen Monitoring - Test Alert'
+          body: 'This is a test alert from the HRM-CodeGen monitoring system. If you receive this email, the email alerting system is working correctly.'
+          to: ${{ env.EMAIL_RECIPIENTS }}
+          from: HRM-CodeGen Monitoring <${{ secrets.SMTP_USERNAME }}>
+      
+      - name: Log test result
+        run: echo "Alert test completed successfully at $(date)"
