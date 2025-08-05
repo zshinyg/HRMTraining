@@ -1,0 +1,78 @@
+NOTICE
+======
+
+This project, “HRM-CodeGen”, is distributed under the MIT License.
+It bundles or depends on several third-party open-source components
+licensed under terms that require attribution.  This NOTICE file
+fulfils the attribution and notice obligations of those licenses.
+Nothing in this file modifies the original licenses; copies of the
+full license texts are provided in the project’s *licenses/* folder
+or can be obtained from the respective upstream projects.
+
+--------------------------------------------------------------------
+1. Apache License 2.0 Attributions
+--------------------------------------------------------------------
+
+The following components are licensed under the Apache License,
+Version 2.0 (the “Apache License”).  Copyright notices,
+license terms, patent grants and limitations stated in the Apache
+License apply to your use of these components.
+
+•  Sapient HRM  
+   © 2022-2025 Sapient Inc.  
+   Repository: https://github.com/sapientinc/HRM  
+   – Included as a *read-only* Git submodule in
+     `external/sapient-hrm/`.  Source code may have been
+     adapted through extension layers in this project; upstream code
+     itself remains unmodified.
+
+•  Transformers (HuggingFace)  
+   © 2018-2025 HuggingFace Inc. and the Transformers contributors  
+   https://github.com/huggingface/transformers
+
+•  Datasets (HuggingFace)  
+   © 2020-2025 HuggingFace Inc. and the Datasets contributors  
+   https://github.com/huggingface/datasets
+
+For each of the above, a copy of the Apache License 2.0 can be found
+in `licenses/Apache-2.0.txt`.  Pursuant to §4 of the Apache License,
+we state that **this project may include modifications** to the
+original work.  Sapient Inc., HuggingFace, and other upstream
+contributors do **not** endorse or maintain this downstream project.
+
+--------------------------------------------------------------------
+2. Other Open-Source Dependencies
+--------------------------------------------------------------------
+
+These libraries are provided under permissive licenses compatible
+with MIT.  Abbreviated license names are given; see the *licenses/*
+directory or upstream repositories for full texts.
+
+| Component | License | Copyright |
+|-----------|---------|-----------|
+| PyTorch | BSD-3-Clause | © 2016-2025 PyTorch Contributors |
+| NumPy | BSD-3-Clause | © 2005-2025 NumPy Developers |
+| SciPy | BSD-3-Clause | © 2001-2025 SciPy Developers |
+| tqdm | MPL-2.0 | © 2014-2025 tqdm Contributors |
+
+--------------------------------------------------------------------
+3. Trademarks & Endorsement
+--------------------------------------------------------------------
+
+Product and company names mentioned herein are trademarks or
+registered trademarks of their respective owners.   
+Use of such names does not imply any affiliation with or endorsement
+by them.
+
+--------------------------------------------------------------------
+4. Modifications
+--------------------------------------------------------------------
+
+Unless explicitly stated, all third-party components are included
+*unmodified*.  Any local changes are maintained in separate adapter
+modules.  Source files authored by this project’s contributors are
+© 2025 zshinyg and released under the MIT License.
+
+--------------------------------------------------------------------
+End of NOTICE
+--------------------------------------------------------------------

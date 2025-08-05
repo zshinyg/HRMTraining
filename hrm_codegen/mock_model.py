@@ -416,114 +416,76 @@ class MockHRMModel(nn.Module):
     
     def generate(
         self,
-        prompt: Union[str, List[str]],
+        input_ids: torch.Tensor,
         max_length: int = 100,
         temperature: float = 1.0,
         top_k: int = 0,
         top_p: float = 1.0,
         do_sample: bool = True,
-        num_return_sequences: int = 1,
         **kwargs
-    ) -> Union[str, List[str]]:
+    ) -> torch.Tensor:
         """
-        Generate text from prompt.
+        Hugging-Face style generation helper.
         
         Args:
-            prompt: Text prompt or list of prompts
-            max_length: Maximum length of generated text
+            input_ids: Tensor of token ids `[batch, seq]` that represents the prompt.
+            max_length: Maximum length of generated sequence (prompt + new tokens)
             temperature: Sampling temperature
             top_k: Number of top tokens to consider
             top_p: Cumulative probability threshold
             do_sample: Whether to sample or use greedy decoding
-            num_return_sequences: Number of sequences to return per prompt
-            **kwargs: Additional arguments
+            **kwargs: Ignored extra keyword arguments (for API parity)
             
         Returns:
-            Generated text or list of generated texts
+            Tensor of generated ids `[batch, seq']`
         """
-        # Get tokenizer
-        tokenizer = get_tokenizer()
+        device = next(self.parameters()).device
+        input_ids = input_ids.to(device)
         
-        # Handle single prompt or list of prompts
-        is_single_prompt = isinstance(prompt, str)
-        prompts = [prompt] if is_single_prompt else prompt
-        
-        # Tokenize prompts
-        encoded = encode(prompts, return_tensors="pt")
-        input_ids = encoded["input_ids"].to(next(self.parameters()).device)
-        
-        # Generate for each prompt
-        all_generated_texts = []
-        
-        for i in range(input_ids.shape[0]):
-            prompt_input_ids = input_ids[i:i+1]
-            
-            # Generate multiple sequences per prompt if requested
-            prompt_generated_texts = []
-            
-            for _ in range(num_return_sequences):
-                # Start with prompt tokens
-                generated_ids = prompt_input_ids.clone()
-                
-                # Set model to evaluation mode
-                self.eval()
-                
-                # Generate tokens auto-regressively
-                with torch.no_grad():
-                    for _ in range(max_length - prompt_input_ids.shape[1]):
-                        # Get logits for next token
-                        outputs = self.forward(generated_ids)
-                        logits = outputs["logits"]
-                        next_token_logits = logits[:, -1, :]
+        generated_ids = input_ids.clone()
+
+        seq_len_limit = max_length
+
+        # Autoregressive loop
+        with torch.no_grad():
+            for _ in range(seq_len_limit - input_ids.shape[1]):
+                outputs = self.forward(generated_ids)
+                next_token_logits = outputs["logits"][:, -1, :]
                         
-                        # Apply temperature
-                        if temperature > 0:
-                            next_token_logits = next_token_logits / temperature
+                # temperature
+                if temperature > 0:
+                    next_token_logits = next_token_logits / temperature
                         
-                        # Apply top-k filtering
-                        if top_k > 0:
-                            indices_to_remove = torch.topk(next_token_logits, k=top_k)[0][:, -1].unsqueeze(-1) <= next_token_logits
-                            next_token_logits = next_token_logits.masked_fill(~indices_to_remove, float("-inf"))
+                # top-k
+                if top_k > 0:
+                    kth_logits = torch.topk(next_token_logits, k=top_k)[0][:, -1].unsqueeze(-1)
+                    mask = kth_logits <= next_token_logits
+                    next_token_logits = next_token_logits.masked_fill(~mask, float("-inf"))
                         
-                        # Apply top-p (nucleus) filtering
-                        if top_p < 1.0:
-                            sorted_logits, sorted_indices = torch.sort(next_token_logits, descending=True)
-                            cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
-                            
-                            # Remove tokens with cumulative probability above the threshold
-                            sorted_indices_to_remove = cumulative_probs > top_p
-                            sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
-                            sorted_indices_to_remove[..., 0] = 0
-                            
-                            indices_to_remove = sorted_indices_to_remove.scatter(1, sorted_indices, sorted_indices_to_remove)
-                            next_token_logits = next_token_logits.masked_fill(indices_to_remove, float("-inf"))
+                # top-p
+                if top_p < 1.0:
+                    sorted_logits, sorted_indices = torch.sort(next_token_logits, descending=True)
+                    cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
+                    sorted_indices_to_remove = cumulative_probs > top_p
+                    sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+                    sorted_indices_to_remove[..., 0] = 0
+                    remove_mask = sorted_indices_to_remove.scatter(1, sorted_indices, sorted_indices_to_remove)
+                    next_token_logits = next_token_logits.masked_fill(remove_mask, float("-inf"))
                         
-                        # Sample or greedy decode
-                        if do_sample:
-                            probs = F.softmax(next_token_logits, dim=-1)
-                            next_token = torch.multinomial(probs, num_samples=1)
-                        else:
-                            next_token = torch.argmax(next_token_logits, dim=-1, keepdim=True)
+                # sample / greedy
+                if do_sample:
+                    probs = F.softmax(next_token_logits, dim=-1)
+                    next_token = torch.multinomial(probs, num_samples=1)
+                else:
+                    next_token = torch.argmax(next_token_logits, dim=-1, keepdim=True)
                         
-                        # Check if EOS token
-                        if next_token.item() == self.config.eos_token_id:
-                            break
-                        
-                        # Append next token
-                        generated_ids = torch.cat([generated_ids, next_token], dim=1)
-                
-                # Decode generated tokens
-                generated_text = decode(generated_ids[0])
-                prompt_generated_texts.append(generated_text)
-            
-            # Add generated texts for this prompt
-            all_generated_texts.extend(prompt_generated_texts)
-        
-        # Return single text or list of texts
-        if is_single_prompt and num_return_sequences == 1:
-            return all_generated_texts[0]
-        else:
-            return all_generated_texts
+                # stop on EOS
+                if next_token.item() == self.config.eos_token_id:
+                    break
+
+                generated_ids = torch.cat([generated_ids, next_token], dim=1)
+
+        return generated_ids
     
     @classmethod
     def from_config(cls, config: Union[Dict[str, Any], MockHRMConfig]) -> "MockHRMModel":
