@@ -117,7 +117,39 @@ The model code is dataset-agnostic; only tokenisation and test-runner adapters c
 
 ---
 
-## 7 References
+## 7 Legal and License Information
+
+This repository is distributed under the **MIT License**; see `LICENSE` for the
+full text.  Unless otherwise noted, **all original source files are  
+© 2025 zshinyg** and released under MIT.
+
+### 7.1 Third-Party Dependencies & Attributions
+The project depends on several open-source libraries released under permissive
+licences compatible with MIT:
+
+| Component | License | Attribution |
+|-----------|---------|-------------|
+| Sapient HRM (submodule) | Apache-2.0 | © Sapient Inc. (2022-2025) |
+| HuggingFace Transformers | Apache-2.0 | © HuggingFace Inc. & contributors |
+| HuggingFace Datasets | Apache-2.0 | © HuggingFace Inc. & contributors |
+| PyTorch | BSD-3-Clause | © PyTorch Contributors |
+| NumPy / SciPy | BSD-3-Clause | © NumPy & SciPy Developers |
+| tqdm | MPL-2.0 | © tqdm Contributors |
+
+A consolidated list of licences and notices is provided in the **`NOTICE`
+file** at the repository root.
+
+### 7.2 Open-Source Compliance
+All inbound licences are permissive; no GPL/AGPL code is included.  Continuous
+integration runs an automated licence scan to ensure ongoing compliance.
+
+### 7.3 Legal Contact
+Questions or concerns about licensing or intellectual-property matters may be
+directed to **legal@zshinyg.dev**.
+
+---
+
+## 8 References
 
 * Sapient Inc. (2025). **Hierarchical Reasoning Model**. GitHub: <https://github.com/sapientinc/HRM>.
 * Austin, J. et al. (2021). **Program Synthesis with Large Language Models**. MBPP dataset. Hugging Face: <https://huggingface.co/datasets/google-research-datasets/mbpp>.
@@ -125,7 +157,7 @@ The model code is dataset-agnostic; only tokenisation and test-runner adapters c
 
 ---
 
-## 8 Roadmap
+## 9 Roadmap
 
 | Phase | Milestone | Status |
 |-------|-----------|--------|
