@@ -65,6 +65,13 @@ except ImportError:
     WANDB_AVAILABLE = False
 
 # ---------------------------------------------------------------------------
+# Enable PyTorch anomaly detection to pinpoint in-place operation errors
+# ---------------------------------------------------------------------------
+# NOTE: This MUST be placed after torch import and before any model
+# construction / forward passes so that stack-traces are captured early.
+torch.autograd.set_detect_anomaly(True)
+
+# ---------------------------------------------------------------------------
 # Monitoring utilities (Priority-1 instrumentation)
 # ---------------------------------------------------------------------------
 # These lightweight helpers are placed in scripts/monitoring_utils.py by
