@@ -1,0 +1,108 @@
+# Python-specific ignores
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment directories
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Data directories and large files
+data/*
+!data/.gitkeep
+*.bin
+*.pt
+*.pth
+*.h5
+*.pkl
+*.npy
+*.npz
+*.arrow
+*.parquet
+*.feather
+
+# Checkpoint and model directories
+checkpoints/*
+!checkpoints/.gitkeep
+models/*
+!models/.gitkeep
+wandb/
+runs/
+lightning_logs/
+mlruns/
+
+# IDE and editor files
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm and other JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and temporary files
+logs/
+*.log
+*.tmp
+tmp/
+temp/
+
+# Configuration files that might contain secrets
+config*.yaml
+!config_example.yaml
+.env
+.secrets
+credentials.json
+*_key.json
+*_secret*
+
+# Cache directories
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/

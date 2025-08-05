@@ -1,0 +1,56 @@
+# Core ML Framework
+torch==2.2.0
+torchvision==0.17.0
+torchaudio==2.2.0
+
+# Transformers and Tokenizers
+transformers==4.36.2
+tokenizers==0.15.0
+sentencepiece==0.1.99
+
+# Data Handling
+datasets==2.16.1
+numpy==1.26.3
+pandas==2.1.4
+jsonlines==4.0.0
+pyarrow==14.0.1
+
+# Evaluation and Metrics
+evaluate==0.4.1
+rouge-score==0.1.2
+sacrebleu==2.3.1
+codecarbon==2.3.2
+
+# Configuration Management
+pyyaml==6.0.1
+hydra-core==1.3.2
+omegaconf==2.3.0
+
+# Visualization
+matplotlib==3.8.2
+seaborn==0.13.1
+plotly==5.18.0
+ipywidgets==8.1.1
+
+# Development Tools
+black==23.12.1
+isort==5.13.2
+flake8==6.1.0
+pytest==7.4.3
+pytest-cov==4.1.0
+jupyter==1.0.0
+notebook==7.0.6
+ipython==8.18.1
+
+# Utilities
+tqdm==4.66.1
+scikit-learn==1.3.2
+rich==13.7.0
+einops==0.7.0
+wandb==0.16.1
+accelerate==0.25.0
+
+# Code Execution (for evaluation)
+python-multipart==0.0.6
+fastapi==0.105.0
+uvicorn==0.24.0
