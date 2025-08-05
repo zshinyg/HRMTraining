@@ -60,8 +60,27 @@ from tqdm import tqdm
 try:
     import wandb
     WANDB_AVAILABLE = True
+    # Monitoring utilities will use wandb if available
 except ImportError:
     WANDB_AVAILABLE = False
+
+# ---------------------------------------------------------------------------
+# Monitoring utilities (Priority-1 instrumentation)
+# ---------------------------------------------------------------------------
+# These lightweight helpers are placed in scripts/monitoring_utils.py by
+# Research Droid.  Importing them is safe even if the module is absent in
+# certain CI contexts because training will only run when the file exists.
+# ---------------------------------------------------------------------------
+try:
+    from monitoring_utils import (
+        init_monitoring,
+        collect_system_metrics,
+        check_anomalies,
+        log_metrics as log_system_metrics,
+    )
+    MONITORING_AVAILABLE = True
+except ImportError:  # Fallback so training still runs without monitoring
+    MONITORING_AVAILABLE = False
 
 # Add parent directory to path to import HRM modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -901,6 +920,16 @@ def train_epoch(
                     "train/lr": scheduler.get_last_lr()[0] if scheduler is not None and not isinstance(scheduler, ReduceLROnPlateau) else optimizer.param_groups[0]["lr"],
                 }
                 
+                # Collect system metrics (Research Droid Priority-1)
+                if MONITORING_AVAILABLE:
+                    system_metrics = collect_system_metrics()
+                    metrics.update(system_metrics)
+                    
+                    # Check for anomalies
+                    anomalies = check_anomalies(metrics)
+                    if anomalies:
+                        logger.warning(f"ANOMALIES DETECTED: {anomalies}")
+                
                 # Log to console
                 logger.info(
                     f"Epoch {epoch}, Step {global_step}: {format_metrics(metrics)}"
@@ -914,6 +943,10 @@ def train_epoch(
                 # Log to wandb
                 if config.logging.use_wandb and WANDB_AVAILABLE:
                     wandb.log(metrics, step=global_step)
+                    
+                # Log system metrics to wandb
+                if MONITORING_AVAILABLE and config.logging.use_wandb and WANDB_AVAILABLE:
+                    log_system_metrics(metrics, step=global_step)
                 
                 # Log gradient norm
                 if config.logging.log_grad_norm:
@@ -1087,6 +1120,11 @@ def train(
             config=config.to_dict(),
         )
         logger.info(f"Wandb initialized: {wandb.run.name}")
+        
+        # Initialize system monitoring (Research Droid Priority-1)
+        if MONITORING_AVAILABLE:
+            init_monitoring()
+            logger.info("System monitoring initialized - real-time metrics enabled")
     
     # Initialize mixed precision
     scaler = None
