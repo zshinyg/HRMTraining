@@ -8,9 +8,9 @@ _Last updated: 2025-08-05_
 
 | Workstream | Lead Droid / Team | Phase | Current % Done | Key Deliverables | ETA |
 |------------|------------------|-------|----------------|------------------|-----|
-| **Phase 3 Engineering** | Software-Engineering Droid + Eng team | Implementation | 60 % | Data layer adaptation in PR review | **Aug-07** |
-| **Research** | Research Droid | Analysis | 10 % | Raw-stats pipeline scaffolded | **Aug-11** |
-| **Infrastructure** | Infrastructure Droid | Setup | 25 % | CI lint/test workflow green | **Aug-09** |
+| **Phase 3 Engineering** | Software-Engineering Code Droid + Eng team | Implementation | 80 % | Gate C1 PR **ready** (70/70 tests) | **Aug-07** |
+| **Research** | Research Droid | Analysis | 100 % | All 4 deliverables drafted & pushed | — |
+| **Infrastructure** | Infrastructure Code Droid | Setup | 95 % | Validation platform deployed, secrets pending | **Aug-06** |
 | **Product** | Product Droid (this doc) | Coordination | 100 % | Success criteria, roadmap, UX, docs | — |
 
 ---
