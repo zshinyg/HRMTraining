@@ -66,10 +66,10 @@ _All gates must pass to enter Phase 4._
 | R1 | Gradient instabilities persist | Med | High | Enable grad-checkpointing, anomaly-detect | Switch to smaller batch |
 | R2 | CI job timeouts (macOS runners) | High | Med | Split tests, cache deps | Self-hosted runner |
 | R3 | Data license conflict in expansion | Low | Med | OSS-license review checklist | Drop dataset |
-| R4 | Flash-Attn compile failure on GPU | Med | High | CPU fallback bench path | Postpone perf goal |
+| ~~R4~~ | ~~Flash-Attn compile failure on GPU~~ | ~~Med~~ | ~~High~~ | ~~CPU fallback bench path~~ | ~~Postpone perf goal~~ |
+| R4-RESOLVED | Flash-Attn dependency removed – custom attention validated on M1/CPU | — | — | **Resolved Aug-05 by Reliability Droid** – CPU/M1 path validated, tests pass | N/A |
 | R5 | Cross-team merge conflicts | Med | Med | Feature branches + fast-forward merges | Lock code-freeze 24 h |
 
----
 
 ## 6 · Coordination Protocols & Communication Plan
 
@@ -104,6 +104,7 @@ Document owner: **Product Droid** – updates daily.
 | Date | Workstream Events | Status |
 |------|-------------------|--------|
 | **Aug-05** | Integration timeline published | ✅ |
+| Aug-05 | Flash-attn blocker resolved by Reliability Droid | ✅ |
 | Aug-06 | Eng PR: MBPP token layer | ⏳ |
 | Aug-07 | Gate C1 (Data-Layer Merge) |  |
 | Aug-08 | Gate C2 (CI/CD) |  |
