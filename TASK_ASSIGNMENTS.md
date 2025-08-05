@@ -14,6 +14,7 @@ _Last updated: 2025-08-05_
 | T-04 | **Research Dashboard Polish**: finalise W&B panels, public link, KPI badges | Research Droid | P2 – Medium | Aug-07 | 🔄 Pending |
 | T-05 | **Product Documentation Refresh & Road-map freeze for Phase 4** | Product Droid | P3 – Low | Aug-07 | 🔄 Ongoing |
 | T-06 | **Security Scan Action**: run `security.yml`, zero Critical findings | Infrastructure Code Droid | P2 – Medium | Aug-08 | 🔄 Pending |
+| T-07 | **Hybrid Architecture Prototype (Planner ➜ Executor)** – implement HRM-plan + GPT-2-exec pipeline *(PRIORITY NOTED – pending current test completion)* | **SE + Research Droids** | **P1 – High** | Aug-10 | 🔄 Pending |
 
 _Status Legend_: ✅ Done · ⏳ In Progress · 🔄 Pending · ⚠ Blocked
 
@@ -38,6 +39,7 @@ T-02 (CI green) ─► Gate C2 ─┐
                             └─► prerequisite for merge to main before Phase 4
 T-04 – independent (dashboard polish)
 T-06 depends on T-02 (CI framework operational)
+T-07 depends on T-03 (real test baseline complete)
 ```
 
 ---
