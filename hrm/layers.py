@@ -230,11 +230,12 @@ class HierarchicalAttention(nn.Module):
         batch_size = low_state.size(0)
         
         # Project queries, keys, and values
-        q = self.query_proj(low_state).view(batch_size, 1, self.num_heads, self.head_dim)
-        k = self.key_proj(high_states).view(
+        # NOTE: use .reshape instead of .view to avoid inadvertent in-place view
+        q = self.query_proj(low_state).reshape(batch_size, 1, self.num_heads, self.head_dim)
+        k = self.key_proj(high_states).reshape(
             batch_size, -1, self.num_heads, self.head_dim
         )
-        v = self.value_proj(high_states).view(
+        v = self.value_proj(high_states).reshape(
             batch_size, -1, self.num_heads, self.head_dim
         )
         
@@ -262,7 +263,8 @@ class HierarchicalAttention(nn.Module):
         attn_output = (
             attn_output.transpose(1, 2)
             .contiguous()
-            .view(batch_size, 1, self.num_heads * self.head_dim)
+            # Use reshape instead of view to avoid potential in-place view issues
+            .reshape(batch_size, 1, self.num_heads * self.head_dim)
         )
         output = self.output_proj(attn_output).squeeze(1)
         

@@ -106,7 +106,7 @@ Document owner: **Product Droid** – updates daily.
 | **Aug-05** | Integration timeline published | ✅ |
 | Aug-05 | Flash-attn blocker resolved by Reliability Droid | ✅ |
 | Aug-05 | Gate C1 **merged** (Data layer) | ✅ |
-| Aug-05 | New blocker: HRM `generate()` interface mismatch → **Assigned to SE Code Droid**, ETA Aug-05 PM | ⏳ |
+| Aug-05 | HRM `generate()` interface mismatch **resolved** by SE Code Droid | ✅ |
 | Aug-06 | Eng PR: MBPP token layer | ⏳ |
 | Aug-07 | Gate C1 (Data-Layer Merge) |  |
 | Aug-08 | Gate C2 (CI/CD) |  |

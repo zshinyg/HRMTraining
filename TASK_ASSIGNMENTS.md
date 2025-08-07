@@ -8,12 +8,15 @@ _Last updated: 2025-08-05_
 
 | ID | Task Description | Owner Droid / Team | Priority | ETA | Status |
 |----|------------------|--------------------|----------|-----|--------|
-| T-01 | **Fix HRM `generate()` interface mismatch** (tokenised `input_ids` vs prompt string) in `real_hypothesis_test.py` & training pipeline | **SE Code Droid** | **P0 – Critical** | Aug-05 PM | ⏳ In Progress |
+| T-01 | **Fix HRM `generate()` interface mismatch** (tokenised `input_ids` vs prompt string) in `real_hypothesis_test.py` & training pipeline | **SE Code Droid** | **P0 – Critical** | Aug-05 PM | ✅ **Done (2025-08-05 18:20 PT)** |
 | T-02 | **Gate C2 – CI/CD Pipeline Validation**: ensure GitHub Actions green incl. W&B upload step | Infrastructure Code Droid | P1 – High | Aug-06 | 🔄 Pending |
-| T-03 | **Gate C3 – Real HRM Forward & Train smoke run** (1-epoch, loss ↓, no NaN) | SE Code Droid | P1 – High | Aug-09 | ⏳ Blocked → T-01 |
+| T-03 | **Gate C3 – URGENT: HRM Training (Smoke Run + Loss Check)** | **SE Code Droid** | **P0 – Critical** | Aug-06 | ⏳ In Progress |
 | T-04 | **Research Dashboard Polish**: finalise W&B panels, public link, KPI badges | Research Droid | P2 – Medium | Aug-07 | 🔄 Pending |
 | T-05 | **Product Documentation Refresh & Road-map freeze for Phase 4** | Product Droid | P3 – Low | Aug-07 | 🔄 Ongoing |
 | T-06 | **Security Scan Action**: run `security.yml`, zero Critical findings | Infrastructure Code Droid | P2 – Medium | Aug-08 | 🔄 Pending |
+| T-07 | **Hybrid Architecture Prototype (Planner ➜ Executor)** – implement HRM-plan + GPT-2-exec pipeline *(PRIORITY NOTED – pending current test completion)* | **SE + Research Droids** | **P1 – High** | Aug-10 | 🔄 Pending |
+| T-08 | **Training Monitoring & Analysis**: set up W&B run, track metrics, advise on hyper-params | Research Droid | P1 – High | Aug-06 | 🔄 Pending |
+| T-09 | **Training Infrastructure Support**: checkpointing, MPS tuning, CI hook for long runs | Infrastructure Code Droid | P1 – High | Aug-06 | 🔄 Pending |
 
 _Status Legend_: ✅ Done · ⏳ In Progress · 🔄 Pending · ⚠ Blocked
 
@@ -23,7 +26,6 @@ _Status Legend_: ✅ Done · ⏳ In Progress · 🔄 Pending · ⚠ Blocked
 
 | Blocker ID | Description | Impacted Tasks | Assigned To | Resolution ETA |
 |------------|-------------|----------------|-------------|----------------|
-| B-01 | HRM `generate()` requires `input_ids`; current code passes string prompt | T-01, T-03 | **SE Code Droid** | Aug-05 PM |
 | B-02 | W&B secrets available but CI step not yet green | T-02 | Infrastructure Code Droid | Aug-06 |
 | B-03 | Security workflow untested; could block Gate C2 merge | T-02, T-06 | Infrastructure Code Droid | Aug-08 |
 
@@ -39,6 +41,9 @@ T-02 (CI green) ─► Gate C2 ─┐
                             └─► prerequisite for merge to main before Phase 4
 T-04 – independent (dashboard polish)
 T-06 depends on T-02 (CI framework operational)
+T-07 depends on T-03 (real test baseline complete)
+T-08 depends on T-03 (training must be running)
+T-09 supports T-03 (infrastructure)
 ```
 
 ---

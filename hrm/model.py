@@ -223,6 +223,10 @@ class HRMModel(nn.Module):
             device=device
         )
         
+        # Create a copy of the initial states to avoid modifying the input
+        high_level_states_copy = [[state.clone() for state in states] for states in high_level_states]
+        low_level_states_copy = [[state.clone() for state in states] for states in low_level_states]
+        
         # Process the sequence
         for t in range(seq_len):
             # Current token embedding
@@ -236,15 +240,21 @@ class HRMModel(nn.Module):
             if current_low_step % self.config.timing_ratio == 0 and current_high_step < len(high_indices):
                 high_output, new_high_states = self.high_level(
                     current_embed,
-                    high_level_states[current_high_step],
+                    high_level_states_copy[current_high_step],
                     timestep=current_high_step,
                 )
                 
-                # Update high-level states
-                high_level_states[current_high_step] = new_high_states
+                # Update high-level states (create new list instead of in-place modification)
+                # Fix for Line ~245: high_level_states[current_high_step] = new_high_states
+                high_level_states_copy[current_high_step] = [state.clone() for state in new_high_states]
                 
-                # Store high-level state in history
-                high_state_history[:, current_high_step] = high_output
+                # Store high-level state in history (create new tensor instead of in-place modification)
+                # Fix for Line ~248: high_state_history[:, current_high_step] = high_output
+                high_state_history = torch.cat([
+                    high_state_history[:, :current_high_step],
+                    high_output.unsqueeze(1),
+                    high_state_history[:, current_high_step+1:]
+                ], dim=1)
             
             # Get the most recent high-level state
             current_high_state = high_state_history[:, :current_high_step+1]
@@ -254,12 +264,13 @@ class HRMModel(nn.Module):
                 current_embed,
                 high_state_history[:, current_high_step],
                 current_high_state,
-                low_level_states[current_low_step],
+                low_level_states_copy[current_low_step],
                 timestep=current_low_step,
             )
             
-            # Update low-level states
-            low_level_states[current_low_step] = new_low_states
+            # Update low-level states (create new list instead of in-place modification)
+            # Fix for Line ~262: low_level_states[current_low_step] = new_low_states
+            low_level_states_copy[current_low_step] = [state.clone() for state in new_low_states]
             
             # Apply layer normalization
             low_output = self.layer_norm(low_output)
@@ -267,8 +278,11 @@ class HRMModel(nn.Module):
             # Project to vocabulary
             token_logits = self.output_projection(low_output)
             
-            # Store logits
-            logits[:, t] = token_logits
+            # Store logits (create new tensor instead of in-place modification)
+            # Fix for Line ~270: logits[:, t] = token_logits
+            logits_t = logits.clone()
+            logits_t[:, t, :] = token_logits
+            logits = logits_t
         
         # Compute loss if labels are provided
         loss = None
@@ -289,8 +303,8 @@ class HRMModel(nn.Module):
         if return_dict:
             outputs = {
                 "logits": logits,
-                "high_level_states": high_level_states,
-                "low_level_states": low_level_states,
+                "high_level_states": high_level_states_copy,
+                "low_level_states": low_level_states_copy,
             }
             if loss is not None:
                 outputs["loss"] = loss
