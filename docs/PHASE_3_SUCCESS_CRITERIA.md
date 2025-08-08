@@ -39,12 +39,12 @@ _Defining when the HRM → CodeGen adaptation is “done” and ready for Phase 
 3. **Unit & integration tests**  
    ```bash
    pytest -q tests/
-   python scripts/test_setup.py --config hrm/configs/mbpp_dev.yaml
+    python scripts/test_setup.py --config configs/hrm/mbpp_dev.yaml
    ```
 
 4. **Training run** (dev config):  
    ```bash
-   python scripts/train.py --config hrm/configs/mbpp_dev.yaml \
+    python scripts/train.py --config configs/hrm/mbpp_dev.yaml \
      --data-path data/mbpp/train.bin --eval-data-path data/mbpp/test.bin \
      --tokenizer-path gpt2 --max-steps 500
    ```
