@@ -280,6 +280,11 @@ class Trainer:
         self.optimizer = self.create_optimizer()
         self.scheduler = self.create_scheduler()
 
+        # Ensure LR starts at 0.0 during warmup so initial optimizer group LR
+        # and scheduler-reported LR match test expectations
+        if self.config.warmup_steps > 0:
+            self.scheduler.step(0)
+
         # Setup mixed precision training
         self.scaler = GradScaler() if config.fp16 else None
 
