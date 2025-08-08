@@ -21,6 +21,13 @@
 4) Add unit test: model instantiation from `configs/hrm/mbpp_dev.yaml` using Sapient-HRM path.
 5) Dataset plug-and-play: add simple registry in `datasets/` and config-driven selection (HF MBPP first).
 
+## Immediate deliverables (for hypothesis demo in 4 days)
+- Script: `scripts/quick_eval_codegen.py` to evaluate Sapient-HRM CodeGen on MBPP dev (≈25 tasks)
+  - Inputs: `configs/codegen_base.yaml`
+  - Outputs: console + JSON summary (Pass@1, per-task timing)
+  - Execution: subprocess isolation (no Docker); CPU/MPS/CUDA friendly
+- Keep edits minimal; no training refactors; reuse `hrm_codegen/generation.py` helpers
+
 ## Open Questions
 - Any blockers merging configs (field name mismatches) between sapient/native?
 - How to harmonize generation APIs for incremental decoding later?
