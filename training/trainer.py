@@ -14,7 +14,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.cuda.amp import GradScaler, autocast
+from torch.cuda.amp import GradScaler
 from torch.optim import AdamW, Optimizer
 from torch.optim.lr_scheduler import CosineAnnealingLR, LambdaLR
 from torch.utils.data import DataLoader
@@ -120,13 +120,14 @@ class TrainingConfig:
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Set device to MPS if available on Mac
-        if (
-            self.device == "cuda"
-            and not torch.cuda.is_available()
-            and hasattr(torch, "has_mps")
-            and torch.has_mps
-        ):
-            self.device = "mps"
+        if self.device == "cuda" and not torch.cuda.is_available():
+            # Prefer modern MPS availability checks over deprecated torch.has_mps
+            try:
+                mps_available = torch.backends.mps.is_available()
+            except Exception:
+                mps_available = False
+            if mps_available:
+                self.device = "mps"
 
         # Validate mixed precision settings
         if self.fp16 and self.bf16:
@@ -519,7 +520,13 @@ class Trainer:
             self.model.gradient_checkpointing_enable()
 
         # Forward pass with mixed precision if enabled
-        with autocast(enabled=self.config.fp16, dtype=torch.float16):
+        # Use the modern torch.amp autocast API; only enable when CUDA is available
+        use_autocast = (
+            self.config.fp16
+            and torch.cuda.is_available()
+            and str(self.config.device).startswith("cuda")
+        )
+        with torch.amp.autocast("cuda", enabled=use_autocast, dtype=torch.float16):
             outputs = self.model(batch["input_ids"])
             logits = outputs["logits"] if isinstance(outputs, dict) else outputs
             loss = self.compute_loss(logits, batch["labels"])
