@@ -38,11 +38,11 @@ _SAP_HRM_DIR = os.path.join(_EXTERNAL_DIR, "sapient-hrm")
 if _SAP_HRM_DIR not in sys.path:
     sys.path.append(_SAP_HRM_DIR)
 
-# Import original HRM config.  The `external/sapient-hrm` directory is not an
-# installable Python package; after we added it to ``sys.path`` above we can
-# import the vendored code directly via its internal package path which starts
-# at ``models``.
-from models.hrm.hrm_act_v1 import HierarchicalReasoningModel_ACTV1Config  # type: ignore
+# Import original HRM config from vendored Sapient package
+# We keep imports consistent with hrm_codegen.model (which uses `sapient_hrm.*`).
+from sapient_hrm.models.hrm.hrm_act_v1 import (  # type: ignore
+    HierarchicalReasoningModel_ACTV1Config,
+)
 
 
 class CodeGenConfig(BaseModel):
