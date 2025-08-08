@@ -5,6 +5,53 @@ The project trains HRM on the **MBPP (Mostly Basic Python Problems)** dataset an
 
 ---
 
+## Start here: Quickstart (copy‑paste)
+
+- Create env, install, and sanity‑check
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pytest -q
+python scripts/test_setup.py --config configs/hrm/mbpp_base.yaml
+```
+
+- Prepare MBPP data (downloads from Hugging Face, tokenizes, and saves under `data/mbpp/`)
+```bash
+python scripts/convert_mbpp.py --split all --output-dir data/mbpp --tokenizer gpt2
+```
+
+- Train (uses the provided config; adjust paths if needed)
+```bash
+python scripts/train.py \
+  --config configs/hrm/mbpp_base.yaml \
+  --data-path data/mbpp/train.bin \
+  --eval-data-path data/mbpp/validation.bin \
+  --output-dir checkpoints/hrm-mbpp
+```
+
+- Evaluate Pass@k on test split
+```bash
+python scripts/evaluate.py \
+  --ckpt checkpoints/hrm-mbpp/latest.pt \
+  --split test \
+  --k 1 5 10
+```
+
+- Optional: Docker (build and run inside a container)
+```bash
+docker build -t hrm-codegen:latest .
+docker run --rm -it \
+  -v "$PWD":/workspace -w /workspace \
+  --gpus all \
+  hrm-codegen:latest bash -lc "python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && pytest -q"
+```
+
+Tips
+- If you’re on CPU or Apple Silicon, training still works (slower). For GPU, ensure a recent PyTorch + CUDA.
+- First run may download a tokenizer; to pre-cache it, see Testing below.
+
+---
+
 ## 1 Project Purpose
 Large Language Models excel at natural language, yet specialised models are still competitive on program synthesis when trained efficiently.  
 This repository investigates:
@@ -72,26 +119,6 @@ Optional: prepare MBPP raw/binary artifacts (for manual training/eval workflows)
 ```bash
 python scripts/convert_mbpp.py --split all --output-dir data/mbpp
 ```
-
----
-
-## 5 Quickstart
-
-1) Create a virtual environment and install dependencies (see Installation)
-
-2) Run tests to verify your setup:
-
-```bash
-pytest -q
-```
-
-3) (Optional) Convert MBPP data for manual training/evaluation:
-
-```bash
-python scripts/convert_mbpp.py --split all --output-dir data/mbpp
-```
-
-4) Train/Evaluate using the examples below or your own configs.
 
 ---
 
