@@ -165,7 +165,7 @@ class HRMSetupTester:
             print(ColoredOutput.success("All tests passed! Your HRM-CodeGen setup is ready for training."))
             print("\nNext steps:")
             print("1. Run data conversion: python scripts/convert_mbpp.py")
-    print("2. Start training: python scripts/train.py --config configs/hrm/mbpp_base.yaml")
+            print("2. Start training: python scripts/train.py --config configs/hrm/mbpp_base.yaml")
         else:
             print(ColoredOutput.error("Some tests failed. Please fix the issues before training."))
             print("\nCommon issues:")
