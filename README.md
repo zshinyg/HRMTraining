@@ -162,6 +162,8 @@ pytest -q
 python -c "from tokenization import get_tokenizer; get_tokenizer(force_reload=True)"
 ```
 
+- Logs: all scripts write logs under `logs/`. A guard test prevents stray `.log` files in the repo root.
+
 ---
 
 ## 8 Extending to New Datasets
