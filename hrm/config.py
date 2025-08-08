@@ -434,10 +434,10 @@ if __name__ == "__main__":
     print(f"Model has approximately {config.model.total_params:,} parameters")
     
     # Save to YAML
-        config.save("configs/hrm/mbpp_base.yaml")
+    config.save("configs/hrm/mbpp_base.yaml")
     
     # Load from YAML
-        loaded_config = HRMConfig.from_yaml("configs/hrm/mbpp_base.yaml")
+    loaded_config = HRMConfig.from_yaml("configs/hrm/mbpp_base.yaml")
     assert config.model.hidden_dim == loaded_config.model.hidden_dim
     
     print("Configuration validation successful!")
