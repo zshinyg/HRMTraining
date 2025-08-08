@@ -168,6 +168,43 @@ The model code is dataset-agnostic; only tokenisation and test-runner adapters c
 
 ---
 
+## 9.1 Daily Workflow & Status Checks
+
+Use this lightweight loop when (re)starting work or handing off:
+
+1) Sync and sanity-check
+
+```bash
+git fetch --all --prune
+git checkout fix/base-hrm-bringup  # or your working branch
+git pull
+source .venv/bin/activate && pytest -q
+```
+
+2) Read current status/next steps
+
+```bash
+cat docs/STATUS.md
+```
+
+3) Track work as GitHub Issues and link them in PRs
+
+- Use one Issue per task (e.g., "Introduce collate_fn for task_id batching")
+- Reference Issues in commits/PRs (e.g., "Fixes #123")
+- Issues: https://github.com/zshinyg/HRMTraining/issues
+
+4) Before pushing
+
+```bash
+black path/to/changes && isort path/to/changes
+pytest -q
+git commit -m "<concise change summary>" && git push
+```
+
+Hand-off tip: update `docs/STATUS.md` with a one-paragraph summary and the next 1–3 actionable items.
+
+---
+
 ## 10 Troubleshooting
 
 - Tokenizer/network issues on first run: pre-cache as above, or set `TRANSFORMERS_OFFLINE=1` after caching.
