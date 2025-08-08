@@ -416,14 +416,15 @@ class MockHRMModel(nn.Module):
     
     def generate(
         self,
-        input_ids: torch.Tensor,
+        input_ids: Optional[torch.Tensor] = None,
+        prompt: Optional[Union[str, List[str]]] = None,
         max_length: int = 100,
         temperature: float = 1.0,
         top_k: int = 0,
         top_p: float = 1.0,
         do_sample: bool = True,
         **kwargs
-    ) -> torch.Tensor:
+    ) -> Union[torch.Tensor, str, List[str]]:
         """
         Hugging-Face style generation helper.
         
@@ -440,8 +441,25 @@ class MockHRMModel(nn.Module):
             Tensor of generated ids `[batch, seq']`
         """
         device = next(self.parameters()).device
-        input_ids = input_ids.to(device)
-        
+
+        used_prompt: Optional[Union[str, List[str]]] = None
+        if prompt is not None:
+            used_prompt = prompt
+            if isinstance(prompt, str):
+                batch_prompts = [prompt]
+                single = True
+            else:
+                batch_prompts = prompt
+                single = False
+            enc = encode(batch_prompts, return_tensors="pt")
+            input_ids = enc["input_ids"].to(device)
+        else:
+            assert input_ids is not None, "Either prompt or input_ids must be provided"
+            single = input_ids.dim() == 1
+            if single:
+                input_ids = input_ids.unsqueeze(0)
+            input_ids = input_ids.to(device)
+
         generated_ids = input_ids.clone()
 
         seq_len_limit = max_length
@@ -479,13 +497,21 @@ class MockHRMModel(nn.Module):
                 else:
                     next_token = torch.argmax(next_token_logits, dim=-1, keepdim=True)
                         
-                # stop on EOS
-                if next_token.item() == self.config.eos_token_id:
-                    break
-
+                # append token
                 generated_ids = torch.cat([generated_ids, next_token], dim=1)
 
-        return generated_ids
+                # early stop if all finished (multi-batch safe)
+                eos_mask = next_token.squeeze(-1) == self.config.eos_token_id
+                if eos_mask.dim() > 0 and torch.all(eos_mask):
+                    break
+        # decode if prompt was provided
+        if used_prompt is not None:
+            texts: List[str] = []
+            for seq in generated_ids:
+                texts.append(decode(seq))
+            return texts[0] if isinstance(used_prompt, str) else texts
+        else:
+            return generated_ids
     
     @classmethod
     def from_config(cls, config: Union[Dict[str, Any], MockHRMConfig]) -> "MockHRMModel":
