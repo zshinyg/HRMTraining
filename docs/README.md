@@ -17,6 +17,7 @@ Central index for project docs. Use this as your entry point to find specs, plan
   - [Integration Timeline](./INTEGRATION_TIMELINE.md)
   - [Phase 3 Validation Checklist](./PHASE_3_VALIDATION_CHECKLIST.md)
   - [Phase 4 Roadmap](./PHASE_4_ROADMAP.md)
+  - [SDLC Tracker](./SDLC_TRACKING.md)
 
 - **Infrastructure & Operations**
   - [Infrastructure Setup](./INFRASTRUCTURE_SETUP.md)
