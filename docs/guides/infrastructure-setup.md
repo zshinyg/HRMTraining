@@ -1,3 +1,10 @@
+---
+status: active
+owner: mlops
+summary: Steps to set up infrastructure for HRM-CodeGen training and evaluation
+last_reviewed: 2025-08-08
+---
+
 # HRM-CodeGen Infrastructure Setup Guide
 
 ## Table of Contents

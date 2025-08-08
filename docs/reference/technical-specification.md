@@ -1,3 +1,10 @@
+---
+status: active
+owner: engineering
+summary: Technical specification of HRM-CodeGen architecture and interfaces
+last_reviewed: 2025-08-08
+---
+
 # TECHNICAL_SPECIFICATION.md  
 _HRM → Code Generation – Phase 2 (Strategic Mapping)_  
 _Last updated: 2025-08-05_

@@ -1,3 +1,10 @@
+---
+status: active
+owner: engineering
+summary: Troubleshooting steps and playbooks for reliability issues
+last_reviewed: 2025-08-08
+---
+
 # RELIABILITY_TROUBLESHOOTING_PLAN.md  
 _v1.0 – 2025-08-05_  
 

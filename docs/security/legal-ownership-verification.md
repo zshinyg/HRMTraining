@@ -1,3 +1,10 @@
+---
+status: active
+owner: security
+summary: Legal code ownership verification checklist and process
+last_reviewed: 2025-08-08
+---
+
 # LEGAL_CODE_OWNERSHIP_VERIFICATION.md
 _HRM-CodeGen Project_  
 _Last updated: 2025-08-05_

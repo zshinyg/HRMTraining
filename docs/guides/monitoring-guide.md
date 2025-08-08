@@ -1,3 +1,10 @@
+---
+status: active
+owner: mlops
+summary: Monitoring and observability practices for training and evaluation
+last_reviewed: 2025-08-08
+---
+
 # HRM-CodeGen Monitoring & Observability Guide
 
 ## Table of Contents

@@ -1,3 +1,10 @@
+---
+status: active
+owner: security
+summary: Security controls, practices, and policies for HRM-CodeGen
+last_reviewed: 2025-08-08
+---
+
 # HRM-CodeGen Security Framework
 
 ## Table of Contents

@@ -185,7 +185,7 @@ The model code is dataset-agnostic; only tokenisation and test-runner adapters c
 ## 9 Contributing & SDLC
 
 - Development workflow emphasizes small, clear, reversible edits with tests. See the SDLC tracker for active decisions, risks, and PR policy:
-  - `docs/SDLC_TRACKING.md`
+  - `docs/process/sdlc-tracking.md`
 
 - Branch naming:
   - `docs/<topic>`, `fix/<area>-<desc>`, `feat/<area>-<desc>`
@@ -205,7 +205,7 @@ Use this lightweight loop when (re)starting work or handing off:
 
 ```bash
 git fetch --all --prune
-git checkout fix/base-hrm-bringup  # or your working branch
+git checkout -b feature/<topic>  # or your working branch
 git pull
 source .venv/bin/activate && pytest -q
 ```
@@ -213,7 +213,7 @@ source .venv/bin/activate && pytest -q
 2) Read current status/next steps
 
 ```bash
-cat docs/STATUS.md
+cat docs/status/README.md
 ```
 
 3) Track work as GitHub Issues and link them in PRs
@@ -244,9 +244,9 @@ Hand-off tip: update `docs/STATUS.md` with a one-paragraph summary and the next 
 
 ## 11 Useful Links
 
-- Documentation Index: `docs/README.md`
-- SDLC Tracker: `docs/SDLC_TRACKING.md`
-- Technical Specification: `TECHNICAL_SPECIFICATION.md`
+- Documentation Index: `docs/index.md`
+- SDLC Tracker: `docs/process/sdlc-tracking.md`
+- Technical Specification: `docs/reference/technical-specification.md`
 
 ---
 
