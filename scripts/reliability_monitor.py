@@ -21,7 +21,6 @@ import json
 import logging
 import os
 import platform
-import psutil
 import signal
 import subprocess
 import sys
@@ -34,25 +33,28 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import psutil
 import torch
 import yaml
 
-# Configure logging
+# Configure logging (ensure logs/ exists)
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("logs/reliability_monitor.log"),
+        logging.FileHandler(LOG_DIR / "reliability_monitor.log"),
     ],
 )
 logger = logging.getLogger("reliability_monitor")
 
 # Constants
 DEFAULT_CONFIG_PATH = "configs/m1_optimized_training.yaml"
-HEARTBEAT_PATH = "logs/heartbeat.txt"
-ALERT_LOG_PATH = "logs/alerts.log"
-BENCHMARK_RESULTS_PATH = "logs/benchmark_results.json"
+HEARTBEAT_PATH = str(LOG_DIR / "heartbeat.txt")
+ALERT_LOG_PATH = str(LOG_DIR / "alerts.log")
+BENCHMARK_RESULTS_PATH = str(LOG_DIR / "benchmark_results.json")
 RECOVERY_SCRIPT_PATH = "scripts/recover.sh"
 MPS_MEMORY_THRESHOLD = 0.9  # 90% of available memory
 CPU_THRESHOLD = 0.9  # 90% CPU usage
@@ -1228,8 +1230,8 @@ def main():
     elif args.mode == "benchmark":
         # Import HRM model for benchmarking
         try:
-            from hrm.model import HRMModel
             from hrm.config import get_default_mbpp_config
+            from hrm.model import HRMModel
 
             config = get_default_mbpp_config()
             model = HRMModel(config)

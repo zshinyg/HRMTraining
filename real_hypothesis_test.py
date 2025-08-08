@@ -10,41 +10,45 @@ on MBPP tasks, and compares performance metrics including Pass@k, inference spee
 statistical significance, and parameter efficiency.
 """
 
+import argparse
+import gc
+import json
+import logging
+import math
+import os
+import random
 import sys
 import time
-import torch
-import numpy as np
-import argparse
-import logging
-import os
-import json
-import random
-import gc
-import math
 import traceback
-from typing import Dict, List, Tuple, Any, Optional, Union
-from pathlib import Path
 from datetime import datetime
-from tqdm import tqdm
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
 from scipy import stats
+from tqdm import tqdm
 
 # Add project root to path
 sys.path.append(".")
 
 # Import our dataset and tokenization utilities
-from datasets.mbpp_loader import MBPPDataset, MBPPConfig
-from tokenization import get_tokenizer, encode, decode
+from datasets.mbpp_loader import MBPPConfig, MBPPDataset
+from tokenization import decode, encode, get_tokenizer
 
-# Configure logging
+# Configure logging: ensure logs are written under the project logs/ directory
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+log_filename = (
+    LOG_DIR / f"hrm_hypothesis_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(
-            f"hrm_hypothesis_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-        ),
+        logging.FileHandler(log_filename),
     ],
 )
 logger = logging.getLogger(__name__)
@@ -85,8 +89,8 @@ def load_hrm_model() -> Tuple[torch.nn.Module, int]:
         sys.path.append(str(sapient_hrm_path))
 
         # Import HRM modules
-        from hrm.model import HRMModel
         from hrm.config import HRMConfig
+        from hrm.model import HRMModel
 
         # ------------------------------------------------------------------
         # 2. Load our adapted YAML config for code generation
@@ -124,7 +128,7 @@ def load_gpt2_model() -> Tuple[torch.nn.Module, int]:
         params: Number of parameters in millions
     """
     try:
-        from transformers import GPT2LMHeadModel, GPT2Config
+        from transformers import GPT2Config, GPT2LMHeadModel
 
         logger.info("Loading GPT-2 117M model from HuggingFace...")
         model = GPT2LMHeadModel.from_pretrained("gpt2")

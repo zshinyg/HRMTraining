@@ -57,10 +57,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hrm.config import HRMConfig
 from hrm.model import HRMModel, create_hrm_model
 
-# Configure logging
+# Configure logging (write under logs/)
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler(LOG_DIR / "evaluate.log"),
+    ],
 )
 logger = logging.getLogger(__name__)
 

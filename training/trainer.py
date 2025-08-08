@@ -8,7 +8,7 @@ including training loops, optimization, validation, checkpointing, and logging.
 import logging
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
@@ -35,7 +35,6 @@ except ImportError:
     TENSORBOARD_AVAILABLE = False
 
 from datasets.mbpp_loader import MBPPConfig, MBPPDataset
-
 # Import our components
 from tokenization import decode, encode, get_tokenizer
 
@@ -842,14 +841,16 @@ class Trainer:
             self.config.output_dir, f"{checkpoint_prefix}.pt"
         )
 
-        # Save checkpoint
+        # Save checkpoint with weights-only safe payload for PyTorch >=2.6
+        # Convert dataclass config to a plain dict and state to a plain dict
+        # so that `torch.load` with default weights_only=True can deserialize it.
         checkpoint = {
             "model_state_dict": self.model.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "scheduler_state_dict": self.scheduler.state_dict(),
             "scaler_state_dict": self.scaler.state_dict() if self.scaler else None,
-            "config": self.config,
-            "state": self.state,
+            "config": asdict(self.config),
+            "state": dict(vars(self.state)),
         }
 
         torch.save(checkpoint, checkpoint_path)
@@ -922,9 +923,17 @@ class Trainer:
         if "scaler_state_dict" in checkpoint and self.scaler:
             self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
 
-        # Load training state
+        # Load training state (support dict or object for backward compatibility)
         if "state" in checkpoint:
-            self.state = checkpoint["state"]
+            loaded_state = checkpoint["state"]
+            if isinstance(loaded_state, dict):
+                for key, value in loaded_state.items():
+                    try:
+                        setattr(self.state, key, value)
+                    except Exception:
+                        pass
+            else:
+                self.state = loaded_state
 
         self.logger.info(f"Loaded checkpoint from {checkpoint_path}")
 
