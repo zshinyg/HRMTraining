@@ -177,6 +177,11 @@ last_reviewed: YYYY-MM-DD
 - `AGENTS.md`
 - `HRMTraining/docs/STATUS.md`
 
+Updates since plan creation:
+- Core docs moved into structured folders with stub redirects left in place.
+- Docs CI added (markdownlint + link check).
+- Task-tracking docs updated with frontmatter, current branch, and links to `docs/index.md`.
+
 Notes:
 - Validate filenames and typos (e.g., assessment vs assesment) before renaming.
 - Use the Migration Plan to categorize and relocate these files.

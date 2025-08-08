@@ -1,3 +1,15 @@
+---
+status: active
+owner: engineering
+summary: Lightweight SDLC tracker for HRM-CodeGen with agreements, risks, and decisions
+last_reviewed: 2025-08-08
+---
+
+## 0. Index
+
+- See the master documentation index at `docs/index.md` for categorized docs.
+- Docs lint and link checks run in PRs via Docs CI.
+
 ### SDLC Tracker – HRM-CodeGen
 
 This document tracks engineering progress and decisions for the HRM-CodeGen project, following lightweight, clear SDLC practices suitable for a research codebase.

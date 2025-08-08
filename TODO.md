@@ -1,3 +1,10 @@
+---
+status: active
+owner: zshinyg
+summary: Overview and prioritized tasks for HRM-CodeGen; tracks work across model, data, CI, and docs
+last_reviewed: 2025-08-08
+---
+
 # HRM-CodeGen · Overview and Prioritized TODOs
 
 ## High-level overview
@@ -37,8 +44,9 @@
   - Enable and modernize `tests/disabled/test_hrm_forward.py.disabled` once deps are present; split into unit/integration.
   - Add unit tests for `hrm/layers.py` (HierarchicalAttention, recurrent layers) and `hrm/model.generate` behaviors.
 - CI & dev‑experience
-  - Add workflows: lint (black/isort/flake8), unit tests (CPU), minimal eval smoke test (no Docker required), optional sandbox test.
+  - Add workflows: lint (black/isort/flake8), unit tests (CPU), minimal eval smoke test (no Docker required), optional sandbox test, docs lint+link check (added).
   - Pre-commit hooks and a short CONTRIBUTING quickstart.
+  - Point contributors to `docs/index.md` as the entry point.
 - Dependencies & versions
   - Review/refresh `requirements.txt` (torch/transformers/datasets) for security and compatibility.
   - Add optional extras (e.g., `sandbox`, `monitoring`) to keep base install light.

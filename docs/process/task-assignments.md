@@ -1,6 +1,13 @@
+---
+status: active
+owner: product
+summary: Active task and ownership tracker for HRM-CodeGen
+last_reviewed: 2025-08-08
+---
+
 # TASK_ASSIGNMENTS.md
 _HRM-CodeGen Project – Active Task & Ownership Tracker_  
-_Last updated: 2025-08-05_
+_Last updated: 2025-08-08_
 
 ---
 
@@ -17,6 +24,7 @@ _Last updated: 2025-08-05_
 | T-07 | **Hybrid Architecture Prototype (Planner ➜ Executor)** – implement HRM-plan + GPT-2-exec pipeline *(PRIORITY NOTED – pending current test completion)* | **SE + Research Droids** | **P1 – High** | Aug-10 | 🔄 Pending |
 | T-08 | **Training Monitoring & Analysis**: set up W&B run, track metrics, advise on hyper-params | Research Droid | P1 – High | Aug-06 | 🔄 Pending |
 | T-09 | **Training Infrastructure Support**: checkpointing, MPS tuning, CI hook for long runs | Infrastructure Code Droid | P1 – High | Aug-06 | 🔄 Pending |
+| T-10 | Docs reorganization: structure docs/, add index, lint+link CI | Product Droid | P0 – Critical | Aug-08 | ✅ Done |
 
 _Status Legend_: ✅ Done · ⏳ In Progress · 🔄 Pending · ⚠ Blocked
 
