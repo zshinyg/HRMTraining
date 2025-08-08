@@ -67,17 +67,37 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Download the MBPP corpus (≈ 1 K tasks):
+Optional: prepare MBPP raw/binary artifacts (for manual training/eval workflows):
 
 ```bash
-python scripts/convert_mbpp.py --split train
+python scripts/convert_mbpp.py --split all --output-dir data/mbpp
 ```
 
 ---
 
-## 5 Usage
+## 5 Quickstart
 
-### 5.1 Training on MBPP
+1) Create a virtual environment and install dependencies (see Installation)
+
+2) Run tests to verify your setup:
+
+```bash
+pytest -q
+```
+
+3) (Optional) Convert MBPP data for manual training/evaluation:
+
+```bash
+python scripts/convert_mbpp.py --split all --output-dir data/mbpp
+```
+
+4) Train/Evaluate using the examples below or your own configs.
+
+---
+
+## 6 Usage
+
+### 6.1 Training on MBPP
 
 ```bash
 python scripts/train.py \
@@ -89,7 +109,7 @@ python scripts/train.py \
 The default config trains for 20 K steps on an A100 (≈ 2 h).  
 Adjust `global_batch_size`, `lr`, and `epochs` as needed.
 
-### 5.2 Evaluating Pass@k
+### 6.2 Evaluating Pass@k
 
 ```bash
 python scripts/evaluate.py \
@@ -101,7 +121,23 @@ Outputs aggregated pass@k and per-task success rates.
 
 ---
 
-## 6 Extending to New Datasets
+## 7 Testing
+
+- Run the full unit test suite:
+
+```bash
+pytest -q
+```
+
+- First-time tokenizer download: the GPT-2 tokenizer will be fetched and cached to `checkpoints/tokenizer/`. If you need to pre-cache (or run offline later):
+
+```bash
+python -c "from tokenization import get_tokenizer; get_tokenizer(force_reload=True)"
+```
+
+---
+
+## 8 Extending to New Datasets
 
 1. Implement a `DatasetBuilder` in `scripts/convert_<dataset>.py` that:
    * reads raw JSON/CSV,
@@ -117,7 +153,38 @@ The model code is dataset-agnostic; only tokenisation and test-runner adapters c
 
 ---
 
-## 7 Legal and License Information
+## 9 Contributing & SDLC
+
+- Development workflow emphasizes small, clear, reversible edits with tests. See the SDLC tracker for active decisions, risks, and PR policy:
+  - `docs/SDLC_TRACKING.md`
+
+- Branch naming:
+  - `docs/<topic>`, `fix/<area>-<desc>`, `feat/<area>-<desc>`
+
+- PR checklist (summary):
+  - Tests pass locally (`pytest -q`)
+  - Touched files formatted (`black`/`isort`); flake8-clean where applicable
+  - Short summary, clear impact; link SDLC tracker when process-related
+
+---
+
+## 10 Troubleshooting
+
+- Tokenizer/network issues on first run: pre-cache as above, or set `TRANSFORMERS_OFFLINE=1` after caching.
+- macOS without CUDA: training utilities fall back to MPS if available; otherwise CPU is supported for tests.
+- Large artifacts: keep out of VCS. Use `outputs/`, `checkpoints/`, and `data/` locally.
+
+---
+
+## 11 Useful Links
+
+- Documentation Index: `docs/README.md`
+- SDLC Tracker: `docs/SDLC_TRACKING.md`
+- Technical Specification: `TECHNICAL_SPECIFICATION.md`
+
+---
+
+## 12 Legal and License Information
 
 This repository is distributed under the **MIT License**; see `LICENSE` for the
 full text.  Unless otherwise noted, **all original source files are  
@@ -149,7 +216,7 @@ directed to **legal@zshinyg.dev**.
 
 ---
 
-## 8 References
+## 13 References
 
 * Sapient Inc. (2025). **Hierarchical Reasoning Model**. GitHub: <https://github.com/sapientinc/HRM>.
 * Austin, J. et al. (2021). **Program Synthesis with Large Language Models**. MBPP dataset. Hugging Face: <https://huggingface.co/datasets/google-research-datasets/mbpp>.
