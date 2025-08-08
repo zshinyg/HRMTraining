@@ -51,6 +51,7 @@ env:
   WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   EMAIL_RECIPIENTS: ${{ secrets.MONITORING_EMAIL_RECIPIENTS }}
+  ENABLE_EMAIL_ALERTS: 'false'  # Set to 'true' to enable email notifications
   ALERT_THRESHOLD_CPU: '90'  # Alert if CPU usage exceeds 90%
   ALERT_THRESHOLD_MEMORY: '85'  # Alert if memory usage exceeds 85%
   ALERT_THRESHOLD_GPU: '95'  # Alert if GPU usage exceeds 95%
@@ -551,7 +552,7 @@ jobs:
           SLACK_FOOTER: 'HRM-CodeGen Monitoring'
       
       - name: Email report to stakeholders
-        if: env.EMAIL_RECIPIENTS != ''
+        if: env.ENABLE_EMAIL_ALERTS == 'true' && env.EMAIL_RECIPIENTS != ''
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_SERVER }}
@@ -583,7 +584,7 @@ jobs:
           SLACK_FOOTER: 'HRM-CodeGen Monitoring'
       
       - name: Send test email alert
-        if: env.EMAIL_RECIPIENTS != ''
+        if: env.ENABLE_EMAIL_ALERTS == 'true' && env.EMAIL_RECIPIENTS != ''
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_SERVER }}
