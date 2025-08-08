@@ -16,9 +16,9 @@ This script handles the complete training pipeline for the HRM model, including:
 - Memory optimization techniques
 
 Usage:
-    python train.py --config hrm/configs/mbpp_base.yaml --data-path data/mbpp/train.bin
-    python train.py --config hrm/configs/mbpp_base.yaml --resume checkpoints/hrm-mbpp/step_10000.pt
-    python train.py --config hrm/configs/mbpp_base.yaml --distributed --world-size 4
+    python train.py --config configs/hrm/mbpp_base.yaml --data-path data/mbpp/train.bin
+    python train.py --config configs/hrm/mbpp_base.yaml --resume checkpoints/hrm-mbpp/step_10000.pt
+    python train.py --config configs/hrm/mbpp_base.yaml --distributed --world-size 4
 """
 
 import argparse

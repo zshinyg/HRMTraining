@@ -1,0 +1,51 @@
+Project
+- Name: HRM-CodeGen (Hierarchical Reasoning Model for code generation)
+- Language: Python (>=3.10)
+- Primary goals: maintain a clean research codebase, keep tests green, and prefer small, clear edits
+
+Editing Principles
+- Keep edits scoped, reversible, and well-structured; avoid broad refactors unless required by tests
+- Match existing style and module structure; do not move files without updating imports/tests
+- Prefer clarity over cleverness; write explicit, readable code and robust error handling
+- Do not add narration comments inside code; add brief docstrings where non-obvious
+- Use meaningful names; avoid abbreviations and 1–2 letter identifiers
+- Handle edge cases with guard clauses; avoid deep nesting
+
+Testing & Validation
+- Default test command: `pytest -q`
+- New or changed behavior must be covered by tests when feasible
+- Before ending a task that modifies runtime logic, run tests and fix obvious failures
+- Respect `pytest.ini` and avoid collecting tests under `tests/disabled/`
+
+Formatting & Linting
+- Format with `black` (line length: default) and organize imports with `isort`
+- Keep code flake8-clean; fix warnings where straightforward
+- Do not reformat unrelated files
+
+Configuration & Paths
+- HRM configs live under `configs/hrm/`; update any lingering `hrm/configs/...` references
+- Do not commit secrets; use environment variables and project docs (`GITHUB_SECRETS_SETUP.md`)
+- Large artifacts (checkpoints, datasets, logs) must stay out of version control
+
+Dependencies
+- Keep `requirements.txt` versions intact unless a test fix requires an update
+- If dependency changes are needed, explain the reason in the commit message and update docs if required
+
+Performance & Safety
+- Avoid accidental OOM: prefer smaller batch sizes and device-agnostic code paths for tests
+- Never execute untrusted code outside the sandboxed evaluator in `scripts/security/safe_code_executor.py`
+
+Cursor Assistant Behavior
+- Prefer absolute paths in tool calls; parallelize independent reads/searches
+- Cite code when helpful; avoid pasting very large code blocks inline
+- Summarize changes succinctly at the end of a turn; ensure a green test run when practical
+- When unsure of intent, ask brief clarifying questions, but do not block on minor details
+
+Non-Goals
+- Do not introduce speculative features or premature abstractions
+- Avoid adding new training backends or frameworks unless requested
+
+Acceptance Criteria (per change)
+- Tests pass locally (`pytest -q`) or failures are unrelated and documented
+- Lint/format clean for touched files
+- Changes align with repository structure and do not regress CLI UX of `scripts/train.py`, `scripts/evaluate.py`

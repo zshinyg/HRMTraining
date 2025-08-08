@@ -82,7 +82,7 @@ python scripts/convert_mbpp.py --split train
 ```bash
 python scripts/train.py \
   --data-path data/mbpp/train.bin \
-  --config hrm/configs/mbpp_base.yaml \
+  --config configs/hrm/mbpp_base.yaml \
   --out-dir checkpoints/hrm_mbpp
 ```
 
@@ -107,7 +107,7 @@ Outputs aggregated pass@k and per-task success rates.
    * reads raw JSON/CSV,
    * yields `(prompt, solution, tests)` triples,
    * serialises to the unified binary format used by HRM.
-2. Add a config file under `hrm/configs/` specifying:
+2. Add a config file under `configs/hrm/` specifying:
    * vocabulary path,
    * context length,
    * evaluation metric.

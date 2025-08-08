@@ -19,7 +19,7 @@ Run this script before starting training to ensure everything is configured corr
 
 Usage:
     python scripts/test_setup.py
-    python scripts/test_setup.py --config hrm/configs/mbpp_dev.yaml
+    python scripts/test_setup.py --config configs/hrm/mbpp_dev.yaml
     python scripts/test_setup.py --verbose
 """
 
@@ -165,7 +165,7 @@ class HRMSetupTester:
             print(ColoredOutput.success("All tests passed! Your HRM-CodeGen setup is ready for training."))
             print("\nNext steps:")
             print("1. Run data conversion: python scripts/convert_mbpp.py")
-            print("2. Start training: python scripts/train.py --config hrm/configs/mbpp_base.yaml")
+    print("2. Start training: python scripts/train.py --config configs/hrm/mbpp_base.yaml")
         else:
             print(ColoredOutput.error("Some tests failed. Please fix the issues before training."))
             print("\nCommon issues:")

@@ -88,7 +88,7 @@ def load_hrm_model() -> Tuple[torch.nn.Module, int]:
         
         # ------------------------------------------------------------------
         # 2. Load our adapted YAML config for code generation
-        #      Path: <project_root>/hrm/configs/mbpp_base.yaml
+#      Path: <project_root>/configs/hrm/mbpp_base.yaml
         # ------------------------------------------------------------------
         config_path = project_root / "hrm" / "configs" / "mbpp_base.yaml"
         
