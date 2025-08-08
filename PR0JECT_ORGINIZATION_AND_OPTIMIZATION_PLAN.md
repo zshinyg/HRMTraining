@@ -101,7 +101,7 @@ last_reviewed: YYYY-MM-DD
   - `docs/SDLC_TRACKING.md` → `docs/process/sdlc-tracking.md`
   - `docs/INTEGRATION_TIMELINE.md` → `docs/process/integration-timeline.md`
   - `docs/INFRASTRUCTURE_SETUP.md` → `docs/guides/infrastructure-setup.md`
-  - `docs/RELlABILITY_TROUBLESHOOTING_PLAN.md` → `docs/guides/reliability-troubleshooting.md`
+  - `docs/RELIABILITY_TROUBLESHOOTING_PLAN.md` → `docs/guides/reliability-troubleshooting.md`
   - `docs/MONITORING_GUIDE.md` → `docs/guides/monitoring-guide.md`
   - `docs/SECURITY_FRAMEWORK.md` → `docs/security/framework.md`
   - `docs/LEGAL_CODE_OWNERSHIP_VERIFICATION.md` → `docs/security/legal-ownership-verification.md`
