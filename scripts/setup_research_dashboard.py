@@ -39,7 +39,9 @@ try:
     import seaborn as sns
     from wandb.apis.public import Reports
 except ImportError:
-    print("Error: Required packages not installed. Run: pip install wandb pandas numpy matplotlib seaborn")
+    print(
+        "Error: Required packages not installed. Run: pip install wandb pandas numpy matplotlib seaborn"
+    )
     sys.exit(1)
 
 
@@ -60,14 +62,14 @@ class ResearchDashboardSetup:
     """Setup W&B research dashboards for HRM validation."""
 
     def __init__(
-        self, 
-        api_key: Optional[str] = None, 
-        entity: Optional[str] = None, 
-        project: str = DEFAULT_PROJECT
+        self,
+        api_key: Optional[str] = None,
+        entity: Optional[str] = None,
+        project: str = DEFAULT_PROJECT,
     ):
         """
         Initialize the dashboard setup.
-        
+
         Args:
             api_key: W&B API key (optional if already logged in)
             entity: W&B entity (username or team name)
@@ -78,39 +80,41 @@ class ResearchDashboardSetup:
         self.project = project
         self.api = None
         self.reports = {}
-        
+
         # Initialize W&B
         self._init_wandb()
-        
+
     def _init_wandb(self):
         """Initialize W&B API."""
         if self.api_key:
             os.environ["WANDB_API_KEY"] = self.api_key
-            
+
         try:
             wandb.login()
             self.api = wandb.Api()
             print(f"Successfully logged in to W&B as {self.api.viewer()['entity']}")
-            
+
             # Set entity if not provided
             if not self.entity:
                 self.entity = self.api.viewer()["entity"]
-                
+
             # Check if project exists
             try:
                 self.api.project(f"{self.entity}/{self.project}")
                 print(f"Project {self.entity}/{self.project} exists")
             except wandb.CommError:
-                print(f"Project {self.entity}/{self.project} will be created on first run")
-                
+                print(
+                    f"Project {self.entity}/{self.project} will be created on first run"
+                )
+
         except Exception as e:
             print(f"Error initializing W&B: {e}")
             sys.exit(1)
-    
+
     def setup_all_dashboards(self):
         """Set up all research dashboards."""
         print("\n=== Setting up HRM Research Dashboards ===\n")
-        
+
         # Create dashboards
         self.setup_pass_at_k_dashboard()
         self.setup_performance_comparison_dashboard()
@@ -118,18 +122,18 @@ class ResearchDashboardSetup:
         self.setup_statistical_analysis_dashboard()
         self.setup_architecture_comparison_dashboard()
         self.setup_experiment_tracking_dashboard()
-        
+
         print("\n=== Dashboard Setup Complete ===\n")
         print("Access your dashboards at:")
         print(f"https://wandb.ai/{self.entity}/{self.project}")
-        
+
         # Return report URLs
         return {name: report.url for name, report in self.reports.items()}
-    
+
     def setup_pass_at_k_dashboard(self):
         """Set up Pass@k metrics dashboard."""
         print("Setting up Pass@k Metrics Dashboard...")
-        
+
         # Create report
         report = self.api.create_report(
             project=self.project,
@@ -143,9 +147,9 @@ class ResearchDashboardSetup:
             - Pass@10: {PERFORMANCE_TARGETS['pass@10'] * 100:.1f}% (vs {BASELINE_MODEL}: 42%)
             
             **Dataset:** {DATASET} ({SAMPLE_SIZE} samples)
-            """
+            """,
         )
-        
+
         # Add panels
         report.add_block(
             type="panel",
@@ -155,17 +159,19 @@ class ResearchDashboardSetup:
                     "type": "line",
                     "query": {
                         "keys": ["val/pass@1", "val/pass@10"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                     },
                     "layout": {"x": 0, "y": 0, "w": 12, "h": 8},
-                    "title": "Pass@k Performance Over Time"
+                    "title": "Pass@k Performance Over Time",
                 }
-            ]
+            ],
         )
-        
+
         # Add bar chart comparing best results
         report.add_block(
             type="panel",
@@ -175,18 +181,20 @@ class ResearchDashboardSetup:
                     "type": "bar",
                     "query": {
                         "keys": ["val/pass@1", "val/pass@10"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                         "aggregation": "maximum",
                     },
                     "layout": {"x": 0, "y": 8, "w": 12, "h": 8},
-                    "title": "Best Pass@k Comparison"
+                    "title": "Best Pass@k Comparison",
                 }
-            ]
+            ],
         )
-        
+
         # Add target markers
         report.add_block(
             type="markdown",
@@ -200,20 +208,20 @@ class ResearchDashboardSetup:
             | Pass@10 | {PERFORMANCE_TARGETS['pass@10'] * 100:.1f}% | 42% |
             
             **Statistical Significance:** Analysis performed on {SAMPLE_SIZE} samples from {DATASET} dataset.
-            """
+            """,
         )
-        
+
         # Save report
         report.save()
         self.reports["pass_at_k"] = report
         print(f"Pass@k Dashboard created: {report.url}")
-        
+
         return report
-    
+
     def setup_performance_comparison_dashboard(self):
         """Set up performance comparison dashboard."""
         print("Setting up Performance Comparison Dashboard...")
-        
+
         # Create report
         report = self.api.create_report(
             project=self.project,
@@ -231,9 +239,9 @@ class ResearchDashboardSetup:
             **Models:**
             - HRM: 27M parameters
             - Baseline: 117M parameters ({BASELINE_MODEL})
-            """
+            """,
         )
-        
+
         # Add panels for inference performance
         report.add_block(
             type="panel",
@@ -243,29 +251,33 @@ class ResearchDashboardSetup:
                     "type": "line",
                     "query": {
                         "keys": ["inference/latency"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                     },
                     "layout": {"x": 0, "y": 0, "w": 6, "h": 8},
-                    "title": "Inference Latency (ms)"
+                    "title": "Inference Latency (ms)",
                 },
                 {
                     "type": "line",
                     "query": {
                         "keys": ["inference/tokens_per_second"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                     },
                     "layout": {"x": 6, "y": 0, "w": 6, "h": 8},
-                    "title": "Tokens Per Second"
-                }
-            ]
+                    "title": "Tokens Per Second",
+                },
+            ],
         )
-        
+
         # Add panels for memory usage
         report.add_block(
             type="panel",
@@ -275,29 +287,33 @@ class ResearchDashboardSetup:
                     "type": "line",
                     "query": {
                         "keys": ["memory/gpu_usage_gb"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                     },
                     "layout": {"x": 0, "y": 8, "w": 6, "h": 8},
-                    "title": "GPU Memory Usage (GB)"
+                    "title": "GPU Memory Usage (GB)",
                 },
                 {
                     "type": "line",
                     "query": {
                         "keys": ["memory/peak_usage_gb"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                     },
                     "layout": {"x": 6, "y": 8, "w": 6, "h": 8},
-                    "title": "Peak Memory Usage (GB)"
-                }
-            ]
+                    "title": "Peak Memory Usage (GB)",
+                },
+            ],
         )
-        
+
         # Add efficiency comparison
         report.add_block(
             type="markdown",
@@ -311,20 +327,20 @@ class ResearchDashboardSetup:
             | {BASELINE_MODEL} | 117M | {{memory/gpu_usage_gb}} GB | {{inference/latency}} ms | {{training/hours}} hours |
             
             **Efficiency Ratio:** HRM achieves similar or better performance with ~4.3x fewer parameters.
-            """
+            """,
         )
-        
+
         # Save report
         report.save()
         self.reports["performance"] = report
         print(f"Performance Dashboard created: {report.url}")
-        
+
         return report
-    
+
     def setup_training_metrics_dashboard(self):
         """Set up training metrics dashboard."""
         print("Setting up Training Metrics Dashboard...")
-        
+
         # Create report
         report = self.api.create_report(
             project=self.project,
@@ -340,9 +356,9 @@ class ResearchDashboardSetup:
             - Gradient norm
             - Training throughput
             - GPU utilization
-            """
+            """,
         )
-        
+
         # Add panels for training metrics
         report.add_block(
             type="panel",
@@ -355,7 +371,7 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 0, "y": 0, "w": 6, "h": 8},
-                    "title": "Loss Curves"
+                    "title": "Loss Curves",
                 },
                 {
                     "type": "line",
@@ -364,11 +380,11 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 6, "y": 0, "w": 6, "h": 8},
-                    "title": "Learning Rate Schedule"
-                }
-            ]
+                    "title": "Learning Rate Schedule",
+                },
+            ],
         )
-        
+
         # Add panels for resource usage
         report.add_block(
             type="panel",
@@ -381,7 +397,7 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 0, "y": 8, "w": 6, "h": 8},
-                    "title": "GPU Utilization (%)"
+                    "title": "GPU Utilization (%)",
                 },
                 {
                     "type": "line",
@@ -390,11 +406,11 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 6, "y": 8, "w": 6, "h": 8},
-                    "title": "Memory Usage (GB)"
-                }
-            ]
+                    "title": "Memory Usage (GB)",
+                },
+            ],
         )
-        
+
         # Add panels for training throughput
         report.add_block(
             type="panel",
@@ -407,7 +423,7 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 0, "y": 16, "w": 6, "h": 8},
-                    "title": "Examples Per Second"
+                    "title": "Examples Per Second",
                 },
                 {
                     "type": "line",
@@ -416,22 +432,22 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 6, "y": 16, "w": 6, "h": 8},
-                    "title": "Tokens Per Second"
-                }
-            ]
+                    "title": "Tokens Per Second",
+                },
+            ],
         )
-        
+
         # Save report
         report.save()
         self.reports["training"] = report
         print(f"Training Metrics Dashboard created: {report.url}")
-        
+
         return report
-    
+
     def setup_statistical_analysis_dashboard(self):
         """Set up statistical analysis dashboard."""
         print("Setting up Statistical Analysis Dashboard...")
-        
+
         # Create report
         report = self.api.create_report(
             project=self.project,
@@ -447,9 +463,9 @@ class ResearchDashboardSetup:
             - Sample size validation
             
             **Dataset:** {DATASET} ({SAMPLE_SIZE} samples)
-            """
+            """,
         )
-        
+
         # Add statistical significance panel
         report.add_block(
             type="markdown",
@@ -486,9 +502,9 @@ class ResearchDashboardSetup:
             ### Sample Size Analysis
             
             Sample size of {SAMPLE_SIZE} provides a margin of error of approximately ±{{stats/margin_of_error}} at 95% confidence.
-            """
+            """,
         )
-        
+
         # Add visualization panel
         report.add_block(
             type="panel",
@@ -498,17 +514,19 @@ class ResearchDashboardSetup:
                     "type": "custom",
                     "query": {
                         "keys": ["val/pass@1_distribution", "val/pass@10_distribution"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                     },
                     "layout": {"x": 0, "y": 0, "w": 12, "h": 12},
-                    "title": "Pass@k Distribution"
+                    "title": "Pass@k Distribution",
                 }
-            ]
+            ],
         )
-        
+
         # Add bootstrap analysis
         report.add_block(
             type="markdown",
@@ -527,20 +545,20 @@ class ResearchDashboardSetup:
             | Relative Improvement | {{stats/improvement_easy}} | {{stats/improvement_medium}} | {{stats/improvement_hard}} | {{stats/improvement_overall}} |
             
             *Problem categories based on difficulty rating in the {DATASET} dataset.*
-            """
+            """,
         )
-        
+
         # Save report
         report.save()
         self.reports["statistical"] = report
         print(f"Statistical Analysis Dashboard created: {report.url}")
-        
+
         return report
-    
+
     def setup_architecture_comparison_dashboard(self):
         """Set up architecture comparison dashboard."""
         print("Setting up Architecture Comparison Dashboard...")
-        
+
         # Create report
         report = self.api.create_report(
             project=self.project,
@@ -555,9 +573,9 @@ class ResearchDashboardSetup:
             - Memory usage
             - Computational complexity
             - Scaling properties
-            """
+            """,
         )
-        
+
         # Add architecture comparison
         report.add_block(
             type="markdown",
@@ -588,9 +606,9 @@ class ResearchDashboardSetup:
             ### Efficiency Analysis
             
             HRM achieves comparable or better performance with approximately 4.3x fewer parameters.
-            """
+            """,
         )
-        
+
         # Add visualization panel
         report.add_block(
             type="panel",
@@ -599,18 +617,24 @@ class ResearchDashboardSetup:
                 {
                     "type": "bar",
                     "query": {
-                        "keys": ["arch/parameters", "arch/memory_usage", "arch/compute_flops"],
-                        "filters": {"$or": [
-                            {"config.model": HRM_MODEL},
-                            {"config.model": BASELINE_MODEL}
-                        ]},
+                        "keys": [
+                            "arch/parameters",
+                            "arch/memory_usage",
+                            "arch/compute_flops",
+                        ],
+                        "filters": {
+                            "$or": [
+                                {"config.model": HRM_MODEL},
+                                {"config.model": BASELINE_MODEL},
+                            ]
+                        },
                     },
                     "layout": {"x": 0, "y": 0, "w": 12, "h": 8},
-                    "title": "Architecture Metrics"
+                    "title": "Architecture Metrics",
                 }
-            ]
+            ],
         )
-        
+
         # Add scaling analysis
         report.add_block(
             type="markdown",
@@ -628,20 +652,20 @@ class ResearchDashboardSetup:
             | 4096 tokens | {{scaling/hrm_memory_4096}} | {{scaling/transformer_memory_4096}} | {{scaling/hrm_time_4096}} | {{scaling/transformer_time_4096}} |
             
             HRM shows linear scaling with context length, while Transformer shows quadratic scaling.
-            """
+            """,
         )
-        
+
         # Save report
         report.save()
         self.reports["architecture"] = report
         print(f"Architecture Comparison Dashboard created: {report.url}")
-        
+
         return report
-    
+
     def setup_experiment_tracking_dashboard(self):
         """Set up experiment tracking dashboard."""
         print("Setting up Experiment Tracking Dashboard...")
-        
+
         # Create report
         report = self.api.create_report(
             project=self.project,
@@ -655,9 +679,9 @@ class ResearchDashboardSetup:
             - Hyperparameter analysis
             - Performance tracking
             - Resource usage monitoring
-            """
+            """,
         )
-        
+
         # Add experiment table
         report.add_block(
             type="weave",
@@ -672,7 +696,7 @@ class ResearchDashboardSetup:
                         "Training Time",
                         "Memory Usage",
                         "Learning Rate",
-                        "Batch Size"
+                        "Batch Size",
                     ],
                     "columnPaths": [
                         "name",
@@ -682,12 +706,12 @@ class ResearchDashboardSetup:
                         "summary.training_time",
                         "summary.memory_usage",
                         "config.learning_rate",
-                        "config.batch_size"
-                    ]
+                        "config.batch_size",
+                    ],
                 }
-            }
+            },
         )
-        
+
         # Add hyperparameter correlation panel
         report.add_block(
             type="panel",
@@ -700,7 +724,7 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 0, "y": 0, "w": 6, "h": 8},
-                    "title": "Learning Rate vs Pass@1"
+                    "title": "Learning Rate vs Pass@1",
                 },
                 {
                     "type": "scatter",
@@ -709,11 +733,11 @@ class ResearchDashboardSetup:
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 6, "y": 0, "w": 6, "h": 8},
-                    "title": "Batch Size vs Pass@1"
-                }
-            ]
+                    "title": "Batch Size vs Pass@1",
+                },
+            ],
         )
-        
+
         # Add parallel coordinates plot
         report.add_block(
             type="panel",
@@ -728,16 +752,16 @@ class ResearchDashboardSetup:
                             "config.num_layers",
                             "config.hidden_size",
                             "config.dropout",
-                            "val/pass@1"
+                            "val/pass@1",
                         ],
                         "filters": {"config.model": HRM_MODEL},
                     },
                     "layout": {"x": 0, "y": 8, "w": 12, "h": 10},
-                    "title": "Hyperparameter Exploration"
+                    "title": "Hyperparameter Exploration",
                 }
-            ]
+            ],
         )
-        
+
         # Add best runs panel
         report.add_block(
             type="markdown",
@@ -765,60 +789,68 @@ class ResearchDashboardSetup:
             hidden_size: {{best_runs.0.config.hidden_size}}
             dropout: {{best_runs.0.config.dropout}}
             ```
-            """
+            """,
         )
-        
+
         # Save report
         report.save()
         self.reports["experiments"] = report
         print(f"Experiment Tracking Dashboard created: {report.url}")
-        
+
         return report
 
     def create_sweep_configuration(self):
         """Create W&B sweep configuration for hyperparameter optimization."""
         print("Creating hyperparameter sweep configuration...")
-        
+
         sweep_config = {
             "method": "bayes",  # Bayesian optimization
             "metric": {"name": "val/pass@1", "goal": "maximize"},
             "parameters": {
-                "learning_rate": {"min": 1e-5, "max": 1e-3, "distribution": "log_uniform"},
+                "learning_rate": {
+                    "min": 1e-5,
+                    "max": 1e-3,
+                    "distribution": "log_uniform",
+                },
                 "batch_size": {"values": [16, 32, 64, 128]},
                 "num_layers": {"values": [4, 6, 8, 12]},
                 "hidden_size": {"values": [256, 512, 768, 1024]},
                 "dropout": {"min": 0.0, "max": 0.5},
-                "weight_decay": {"min": 0.0, "max": 0.1}
-            }
+                "weight_decay": {"min": 0.0, "max": 0.1},
+            },
         }
-        
+
         # Save sweep configuration to file
         output_dir = Path("configs")
         output_dir.mkdir(exist_ok=True)
-        
+
         with open(output_dir / "sweep_config.json", "w") as f:
             json.dump(sweep_config, f, indent=2)
-        
+
         print(f"Sweep configuration saved to: {output_dir / 'sweep_config.json'}")
-        
+
         # Create sweep
         try:
-            sweep_id = wandb.sweep(sweep_config, project=self.project, entity=self.entity)
+            sweep_id = wandb.sweep(
+                sweep_config, project=self.project, entity=self.entity
+            )
             print(f"Sweep created with ID: {sweep_id}")
-            print(f"Start sweep agent with: wandb agent {self.entity}/{self.project}/{sweep_id}")
+            print(
+                f"Start sweep agent with: wandb agent {self.entity}/{self.project}/{sweep_id}"
+            )
             return sweep_id
         except Exception as e:
             print(f"Error creating sweep: {e}")
             return None
-    
+
     def create_report_templates(self):
         """Create report templates for research paper."""
         print("Creating report templates...")
-        
+
         # Create templates directory
         templates_dir = Path("reports/templates")
         templates_dir.mkdir(exist_ok=True, parents=True)
-        
+
         # Create performance comparison template
         performance_template = {
             "title": "HRM vs Transformer Performance Comparison",
@@ -830,7 +862,7 @@ class ResearchDashboardSetup:
                     |-------|------------|--------------|
                     | HRM | 27M | Hierarchical Recurrent Memory |
                     | {BASELINE_MODEL} | 117M | Standard Transformer |
-                    """
+                    """,
                 },
                 {
                     "title": "Performance Metrics",
@@ -839,7 +871,7 @@ class ResearchDashboardSetup:
                     |-------|--------|---------|-------------------|--------------|
                     | HRM | {{val/pass@1}} | {{val/pass@10}} | {{inference/latency}} ms | {{memory/gpu_usage_gb}} GB |
                     | {BASELINE_MODEL} | {{val/pass@1}} | {{val/pass@10}} | {{inference/latency}} ms | {{memory/gpu_usage_gb}} GB |
-                    """
+                    """,
                 },
                 {
                     "title": "Statistical Analysis",
@@ -850,48 +882,52 @@ class ResearchDashboardSetup:
                     | Pass@10 | {{stats/pass@10_pvalue}} | {{stats/pass@10_significant}} | {{stats/pass@10_effect_size}} |
                     
                     *Significance level: α = 0.05*
-                    """
-                }
-            ]
+                    """,
+                },
+            ],
         }
-        
+
         # Save templates
         with open(templates_dir / "performance_comparison.json", "w") as f:
             json.dump(performance_template, f, indent=2)
-        
+
         print(f"Report templates saved to: {templates_dir}")
-        
+
         return templates_dir
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Set up W&B research dashboards for HRM validation")
+    parser = argparse.ArgumentParser(
+        description="Set up W&B research dashboards for HRM validation"
+    )
     parser.add_argument("--api-key", help="W&B API key")
     parser.add_argument("--entity", help="W&B entity (username or team name)")
     parser.add_argument("--project", default=DEFAULT_PROJECT, help="W&B project name")
-    parser.add_argument("--create-sweep", action="store_true", help="Create hyperparameter sweep")
-    parser.add_argument("--create-templates", action="store_true", help="Create report templates")
+    parser.add_argument(
+        "--create-sweep", action="store_true", help="Create hyperparameter sweep"
+    )
+    parser.add_argument(
+        "--create-templates", action="store_true", help="Create report templates"
+    )
     args = parser.parse_args()
-    
+
     # Initialize dashboard setup
     dashboard_setup = ResearchDashboardSetup(
-        api_key=args.api_key,
-        entity=args.entity,
-        project=args.project
+        api_key=args.api_key, entity=args.entity, project=args.project
     )
-    
+
     # Set up dashboards
     dashboard_urls = dashboard_setup.setup_all_dashboards()
-    
+
     # Create sweep configuration if requested
     if args.create_sweep:
         sweep_id = dashboard_setup.create_sweep_configuration()
-    
+
     # Create report templates if requested
     if args.create_templates:
         templates_dir = dashboard_setup.create_report_templates()
-    
+
     print("\nSetup complete! Access your dashboards at:")
     for name, url in dashboard_urls.items():
         print(f"- {name.capitalize()}: {url}")

@@ -13,7 +13,7 @@ Key modifications:
 
 Usage:
     from hrm_codegen import HRMCodeGenerator, generate_code
-    
+
     model = HRMCodeGenerator.from_pretrained("checkpoints/codegen_base")
     code = generate_code(model, "Write a function to sort a list of integers")
 """
@@ -53,7 +53,6 @@ __all__ = [
     "get_default_config",
     "merge_configs",
     "create_runtime_config",
-    
     # Model and generation (to be uncommented when implemented)
     # "HRMCodeGenerator",
     # "generate_code",

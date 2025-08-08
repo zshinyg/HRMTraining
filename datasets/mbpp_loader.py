@@ -16,8 +16,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 # Import our tokenization module
-from tokenization import (create_training_batch, encode, get_tokenizer,
-                          get_vocab_size)
+from tokenization import create_training_batch, encode, get_tokenizer, get_vocab_size
 
 
 @dataclass
@@ -241,9 +240,11 @@ class MBPPDataset(Dataset):
             "input_ids": batch["input_ids"][0],
             "labels": batch["labels"][0],
             "attention_mask": batch["attention_mask"][0],
-            "task_id": torch.tensor(sample["task_id"], dtype=torch.long)
-            if self.config.return_task_id_tensor
-            else sample["task_id"],
+            "task_id": (
+                torch.tensor(sample["task_id"], dtype=torch.long)
+                if self.config.return_task_id_tensor
+                else sample["task_id"]
+            ),
         }
 
         # Apply transform if provided
