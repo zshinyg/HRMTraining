@@ -139,3 +139,44 @@ last_reviewed: YYYY-MM-DD
 - Discoverability via `docs/index.md` within 2 clicks.
 - No broken links or duplicated content.
 - Consistent style across all docs.
+
+## Current Markdown Inventory (initial scan)
+- `docs/USER_EXPERIENCE_DESIGN.md`
+- `docs/SYSTEM_RELIABILITY_SUMMARY.md`
+- `docs/STATUS.md`
+- `docs/SUCCESS_METRICS_DASHBOARD.md`
+- `docs/SECURITY_FRAMEWORK.md`
+- `docs/TASK_ASSIGNMENTS.md`
+- `docs/LEGAL_CODE_OWNERSHIP_VERIFICATION.md`
+- `docs/PIVOT_DECISION.md`
+- `docs/RISK_ASSSESSMENT.md` (verify spelling; likely `RISK_ASSESSMENT.md`)
+- `docs/SDLC_TRACKING.md`
+- `docs/MONITORING_GUIDE.md`
+- `docs/RELIABILITY_TROUBLESHOOTING_PLAN.md`
+- `docs/ARCHITECTURE_FINDINGS.md`
+- `docs/INTEGRATION_TIMELINE.md`
+- `docs/PHASE_3_VALIDATION_CHECKLIST.md`
+- `docs/README.md`
+- `docs/INFRASTRUCTURE_SETUP.md`
+- `docs/ARCHITECTURE.md`
+- `docs/ADAPTATION_PLAN.md`
+- `docs/PHASE_4_ROADMAP.md`
+- `docs/INFRASTRUCTURE_STATUS.md`
+- `docs/DOCUMENTATION_STRATEGY.md`
+- `docs/COORDINATION_CHECKLIST.md`
+- `docs/HYPOTHESIS_VALIDATION_SUMMARY.md`
+- `docs/COMPONENT_MAPPING_ANALYSIS.md`
+- `docs/PHASE_3_SUCCESS_CRITERIA.md`
+- `docs/IMPLEMENTATION_PLAN.md`
+- `docs/CONTRIBUTING.md`
+- `external/README.md`
+- `README.md`
+- `TECHNICAL_SPECIFICATION.md`
+- `TODO.md`
+- `HYBRID_ARCHITECTURE_PROPOSAL.md`
+- `AGENTS.md`
+- `HRMTraining/docs/STATUS.md`
+
+Notes:
+- Validate filenames and typos (e.g., assessment vs assesment) before renaming.
+- Use the Migration Plan to categorize and relocate these files.
