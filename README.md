@@ -230,7 +230,7 @@ pytest -q
 git commit -m "<concise change summary>" && git push
 ```
 
-Hand-off tip: update `docs/STATUS.md` with a one-paragraph summary and the next 1–3 actionable items.
+Hand-off tip: update `docs/status/README.md` with a one-paragraph summary and the next 1–3 actionable items.
 
 ---
 
@@ -247,6 +247,7 @@ Hand-off tip: update `docs/STATUS.md` with a one-paragraph summary and the next 
 - Documentation Index: `docs/index.md`
 - SDLC Tracker: `docs/process/sdlc-tracking.md`
 - Technical Specification: `docs/reference/technical-specification.md`
+- Agents Guide: `docs/process/agents.md`
 
 ---
 

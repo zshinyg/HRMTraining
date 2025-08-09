@@ -1,0 +1,17 @@
+# Lychee link checker configuration
+verbose = true
+no_progress = true
+max_retries = 2
+retry_wait_time = 1
+timeout = 20
+# Treat common rate-limited or gated statuses as acceptable in CI
+accept = [200, 201, 202, 204, 206, 301, 302, 307, 308, 403, 429]
+# Exclude patterns that are often blocked in CI or rate-limited
+exclude = [
+  "localhost",
+  "127\\.0\\.0\\.1",
+  "example\\.com",
+  "https://github\\.com/.*/issues/.*",
+  "https://github\\.com/.*/pull/.*",
+  "https://huggingface\\.co/.*"
+]

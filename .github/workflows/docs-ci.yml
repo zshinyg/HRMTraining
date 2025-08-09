@@ -6,6 +6,7 @@ on:
       - '**/*.md'
       - '.markdownlint.json'
       - '.github/workflows/docs-ci.yml'
+      - '.lychee.toml'
 
 jobs:
   docs:
@@ -13,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -25,9 +28,15 @@ jobs:
       - name: Run markdownlint
         run: markdownlint '**/*.md' -c .markdownlint.json || true
 
-      - name: Install lychee
+      - name: Internal link check (offline)
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --verbose --no-progress --exclude-mail --accept 429 '**/*.md'
+          args: --offline --verbose --no-progress '**/*.md'
+
+      - name: External link check (best-effort)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --verbose --no-progress --config .lychee.toml '**/*.md'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
