@@ -14,6 +14,7 @@ Please update any bookmarks or links.
   - Add `scripts/quick_eval_codegen.py` to run a small MBPP dev slice (e.g., 25 tasks) using `hrm_codegen/` and report Pass@1 and latency.
   - Use subprocess-based execution (no Docker) for safety; no training refactors.
   - Acceptance: single command prints Pass@1, average latency; runs on CPU/MPS/CUDA.
+  - See `docs/CODEGEN_EVAL_PLAN.md` for exact commands, outputs, and acceptance criteria.
 - Fix generation correctness/perf in `hrm/HRMModel`
   - Respect `attention_mask` throughout forward/generation and apply hierarchical masks (`get_hierarchical_mask`).
   - Implement proper incremental decoding/KV-state caching (avoid full re-forward each step).
