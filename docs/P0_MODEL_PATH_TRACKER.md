@@ -28,6 +28,9 @@
   - Execution: subprocess isolation (no Docker); CPU/MPS/CUDA friendly
 - Keep edits minimal; no training refactors; reuse `hrm_codegen/generation.py` helpers
 
+## Linked docs
+- `docs/CODEGEN_EVAL_PLAN.md` — end-to-end evaluation plan and commands
+
 ## Open Questions
 - Any blockers merging configs (field name mismatches) between sapient/native?
 - How to harmonize generation APIs for incremental decoding later?
