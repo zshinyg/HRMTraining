@@ -33,6 +33,9 @@
 - [Phase 3 Validation Checklist](./process/phase-3-validation-checklist.md)
 - [Task Assignments](./process/task-assignments.md)
 - [Documentation Strategy](./process/documentation-strategy.md)
+- [Project Organization & Optimization Plan](./plans/project-organization-and-optimization-plan.md)
+- [TODO](./process/todo.md)
+- [GitHub Secrets Setup](./security/github-secrets-setup.md)
 
 ## Reference
 - [Technical Specification](../docs/reference/technical-specification.md)
