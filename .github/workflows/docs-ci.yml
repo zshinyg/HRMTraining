@@ -28,9 +28,15 @@ jobs:
       - name: Run markdownlint
         run: markdownlint '**/*.md' -c .markdownlint.json || true
 
-      - name: Link check (lychee)
+      - name: Internal link check (offline)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --verbose --no-progress '**/*.md'
+
+      - name: External link check (best-effort)
         uses: lycheeverse/lychee-action@v2
         with:
           args: --verbose --no-progress --config .lychee.toml '**/*.md'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
