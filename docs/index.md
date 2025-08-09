@@ -35,6 +35,7 @@
 - [Documentation Strategy](./process/documentation-strategy.md)
 - [Project Organization & Optimization Plan](./plans/project-organization-and-optimization-plan.md)
 - [TODO](./process/todo.md)
+- [Agents](./process/agents.md)
 - [GitHub Secrets Setup](./security/github-secrets-setup.md)
 
 ## Reference
