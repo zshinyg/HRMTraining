@@ -71,11 +71,26 @@ Phase 2 outputs:
 ## 4. Technical Implementation Details
 
 1. **Tokenizer**  
+   ```python
+   from tokenization import get_tokenizer, encode, decode
+
+   tok = get_tokenizer()
+   # Cache lives under checkpoints/tokenizer; corrupted cache is auto-repaired
+
+   # Encoding with explicit BOS/EOS support and attention_mask maintenance
+   batch = encode(
+       ["def add(a, b):", "return a + b"],
+       add_bos=True,
+       add_eos=True,
+       max_length=64,
+       return_tensors="pt",
+   )
+   # batch contains input_ids and attention_mask aligned to max_length
+
+   # Decoding safely handles empty inputs
+   text = decode([])  # ""
    ```
-   from transformers import AutoTokenizer  
-   tok = AutoTokenizer.from_pretrained("gpt2", add_bos_token=True)  
-   ```
-   Save vocab JSON to `checkpoints/tokenizer.json`; freeze during training.
+   The tokenizer is saved to `checkpoints/tokenizer/` and reused across runs.
 
 2. **Embedding Path**  
    ```python
