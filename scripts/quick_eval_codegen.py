@@ -91,6 +91,7 @@ def run_quick_eval(args: argparse.Namespace) -> Dict[str, Any]:
     # Try to load Sapient-HRM CodeGen; fall back to mock model if unavailable
     codegen_cfg = None
     model = None
+    model_source = "unknown"
     try:
         # Defer heavy imports to runtime to catch missing vendor cleanly
         from hrm_codegen.config import load_config as load_codegen_config  # type: ignore
@@ -99,8 +100,15 @@ def run_quick_eval(args: argparse.Namespace) -> Dict[str, Any]:
         codegen_cfg = load_codegen_config(args.config)
         model = HRMCodeGenerator.from_config(codegen_cfg).to(device)
         model.eval()
+        model_source = "sapient_hrm"
     except Exception as e:
         # Fallback to mock model for a smoke test when Sapient HRM isn't present
+        model_source = "mock"
+        print(
+            "WARNING: Using MockHRMModel fallback instead of Sapient HRM. "
+            "To use the real HRM, clone the upstream into external/sapient-hrm or install the package 'sapient_hrm' in your environment.",
+            file=sys.stderr,
+        )
         mock_cfg = MockHRMConfig(
             hidden_size=256,
             num_hidden_layers=4,
@@ -175,9 +183,10 @@ def run_quick_eval(args: argparse.Namespace) -> Dict[str, Any]:
         "temperature": args.temperature,
         "top_p": args.top_p,
         "top_k": args.top_k,
+        "model_source": model_source,
     }
 
-    # Print concise summary
+    # Print concise summary (always include model source)
     print(json.dumps(summary, indent=2))
 
     # Save detailed results
