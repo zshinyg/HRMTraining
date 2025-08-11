@@ -112,4 +112,4 @@ def bootstrap_diff(a, b, iters=10_000):
 
 ---
 
-_Contact: **zshinyg** (Product Lead) · **hrm-codegen@factory.ai**_  
+_Contact: **zshinyg** (Product Lead)_  
