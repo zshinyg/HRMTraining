@@ -542,8 +542,12 @@ class FailureAnalyzer:
         try:
             data_file = self.analysis_dir / "data" / "failures.pkl"
             if data_file.exists():
-                with open(data_file, "rb") as f:
-                    data = pickle.load(f)
+                # Only load from our controlled directory; refuse symlinks
+                if data_file.is_symlink():
+                    logger.error("Refusing to load symlinked pickle: %s", data_file)
+                else:
+                    with open(data_file, "rb") as f:
+                        data = pickle.load(f)
                 
                 self.failures = data.get("failures", [])
                 self.patterns = data.get("patterns", [])
@@ -580,8 +584,12 @@ class FailureAnalyzer:
                 "total_analyses": self.total_analyses,
             }
             
-            with open(data_file, "wb") as f:
-                pickle.dump(data, f)
+            # Save only to controlled path (not following symlinks)
+            if data_file.is_symlink():
+                logger.error("Refusing to overwrite symlinked pickle: %s", data_file)
+            else:
+                with open(data_file, "wb") as f:
+                    pickle.dump(data, f)
             
             logger.debug(f"Saved failure data to {data_file}")
             

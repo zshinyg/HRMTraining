@@ -113,7 +113,11 @@ class MBPPEvalDataset(Dataset):
         # Load data
         logger.info(f"Loading data from {data_path}")
         try:
-            with open(data_path, "rb") as f:
+            # Only load from a trusted, non-symlinked path
+            path_obj = Path(data_path)
+            if path_obj.is_symlink():
+                raise RuntimeError(f"Refusing to load symlinked dataset file: {data_path}")
+            with open(path_obj, "rb") as f:
                 self.examples = pickle.load(f)
             logger.info(f"Loaded {len(self.examples)} examples")
         except Exception as e:
@@ -180,7 +184,8 @@ class CodeExecutor:
         """
         self.timeout = timeout
         self.max_memory_mb = max_memory_mb
-        self.use_subprocess = use_subprocess
+        # Default to subprocess execution for isolation; allow explicit opt-in for in-process
+        self.use_subprocess = use_subprocess if use_subprocess is not None else True
 
     def _set_resource_limits(self):
         """Set resource limits for the current process."""

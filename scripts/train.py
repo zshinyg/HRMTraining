@@ -129,7 +129,11 @@ class MBPPDataset(Dataset):
         # Load data
         logger.info(f"Loading data from {data_path}")
         try:
-            with open(data_path, "rb") as f:
+            # Load only from a trusted, non-symlinked path to prevent pickle abuse
+            path_obj = Path(data_path)
+            if path_obj.is_symlink():
+                raise RuntimeError(f"Refusing to load symlinked dataset file: {data_path}")
+            with open(path_obj, "rb") as f:
                 self.examples = pickle.load(f)
             logger.info(f"Loaded {len(self.examples)} examples")
         except Exception as e:
