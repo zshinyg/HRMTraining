@@ -22,6 +22,9 @@ external/
 We keep the upstream code **unaltered**; all adaptation layers live in our own source tree.  
 If fixes or changes are required, contribute them upstream or patch via a separate directory, never commit them directly inside `external/sapient-hrm`.
 
+### Visibility in tooling
+- The script `scripts/quick_eval_codegen.py` will print a WARNING and include a `model_source` field in its JSON summary when the Sapient HRM is not used (i.e., when falling back to the mock). This makes non-HRM runs immediately obvious in logs and artifacts.
+
 ## Git & CI notes
 
 * Large checkpoints and build artefacts should be excluded via `.gitignore`.
