@@ -34,13 +34,31 @@ def get_tokenizer(force_reload: bool = False) -> PreTrainedTokenizer:
     global _tokenizer
 
     if _tokenizer is None or force_reload:
-        # Check for cached tokenizer
-        if (
-            os.path.exists(os.path.join(_CACHE_DIR, "tokenizer.json"))
-            and not force_reload
-        ):
-            _tokenizer = AutoTokenizer.from_pretrained(_CACHE_DIR)
-        else:
+        # Check for cached tokenizer and attempt to load it. If the cache is
+        # missing or corrupted, fall back to a fresh GPT-2 tokenizer and
+        # overwrite the cache to restore a good state.
+        cache_tokenizer_path = os.path.join(_CACHE_DIR, "tokenizer.json")
+        should_try_cache = os.path.exists(cache_tokenizer_path) and not force_reload
+
+        loaded = False
+        if should_try_cache:
+            try:
+                _tokenizer = AutoTokenizer.from_pretrained(_CACHE_DIR)
+                loaded = True
+            except Exception:
+                # Corrupted or incompatible cache; clear and rebuild below
+                try:
+                    # Best-effort cleanup of bad cache contents
+                    for fname in os.listdir(_CACHE_DIR):
+                        try:
+                            os.remove(os.path.join(_CACHE_DIR, fname))
+                        except Exception:
+                            pass
+                except Exception:
+                    # If cleanup fails, continue and let save_pretrained overwrite files
+                    pass
+
+        if not loaded:
             # Load from HuggingFace and save locally
             _tokenizer = AutoTokenizer.from_pretrained("gpt2")
 
