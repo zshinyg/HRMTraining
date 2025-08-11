@@ -7,6 +7,7 @@ and batch generation capabilities.
 """
 
 import os
+import sys
 import time
 from typing import Dict, List, Optional, Tuple, Union, Any, Callable
 
@@ -367,7 +368,7 @@ def _execute_tests(code: str, test_cases: List[str], timeout: float = 3.0) -> bo
     try:
         # Run the code with test cases
         result = subprocess.run(
-            ["python", temp_path], capture_output=True, text=True, timeout=timeout
+            [sys.executable, temp_path], capture_output=True, text=True, timeout=timeout
         )
 
         # Check if execution was successful

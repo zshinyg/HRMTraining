@@ -605,11 +605,11 @@ class ExperimentData:
                 # Query Prometheus
                 response = requests.get(f"{self.config.prometheus_url}/api/v1/query", params={
                     "query": "up"  # Simple query to check if Prometheus is up
-                })
+                }, timeout=5)
                 
                 if response.status_code == 200:
                     # Prometheus is up, get metrics
-                    metrics_response = requests.get(f"{self.config.prometheus_url}/metrics")
+                    metrics_response = requests.get(f"{self.config.prometheus_url}/metrics", timeout=5)
                     if metrics_response.status_code == 200:
                         # Parse metrics
                         prometheus_metrics = {}
@@ -794,7 +794,7 @@ class ExperimentData:
                     response = requests.get(
                         f"https://api.github.com/repos/{repo}/actions/runs",
                         headers=headers,
-                    )
+                    timeout=10)
                     
                     if response.status_code == 200:
                         workflow_runs = response.json()
@@ -1691,7 +1691,7 @@ class TrainingControl:
                         "text": f"[{level.upper()}] {message}",
                         "username": f"Dashboard - {self.experiment_name}",
                     },
-                )
+                timeout=5)
                 
                 return response.status_code == 200
             
