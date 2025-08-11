@@ -127,9 +127,10 @@ def encode(
         return_tensors=return_tensors,
     )
 
-    # Manually add BOS/EOS if requested
+    # Manually add BOS/EOS if requested and keep attention_mask/max_length consistent
     if add_bos or add_eos:
         input_ids = encoded["input_ids"]
+        pad_id = tokenizer.pad_token_id
         if isinstance(input_ids, torch.Tensor):
             # Handle tensor case
             batch_size = input_ids.size(0)
@@ -149,14 +150,37 @@ def encode(
                     device=input_ids.device,
                 )
                 input_ids = torch.cat([input_ids, eos_tensor], dim=1)
+
+            # Enforce max_length if provided after adding tokens
+            if max_length is not None:
+                input_ids = input_ids[:, : max_length]
+
             encoded["input_ids"] = input_ids
+
+            # Recompute attention_mask to match new input_ids
+            encoded["attention_mask"] = (input_ids != pad_id).to(
+                dtype=encoded.get("attention_mask", torch.tensor([], dtype=torch.long)).dtype
+                if isinstance(encoded.get("attention_mask"), torch.Tensor)
+                else torch.long
+            )
         else:
             # Handle list case
             for i in range(len(input_ids)):
+                seq = input_ids[i]
                 if add_bos:
-                    input_ids[i] = [tokenizer.bos_token_id] + input_ids[i]
+                    seq = [tokenizer.bos_token_id] + seq
                 if add_eos:
-                    input_ids[i] = input_ids[i] + [tokenizer.eos_token_id]
+                    seq = seq + [tokenizer.eos_token_id]
+                if max_length is not None:
+                    seq = seq[:max_length]
+                input_ids[i] = seq
+
+            # Recompute attention_mask for list case
+            attention_mask = []
+            for seq in input_ids:
+                mask = [0 if token == pad_id else 1 for token in seq]
+                attention_mask.append(mask)
+            encoded["attention_mask"] = attention_mask
 
     # If single text was passed, and we're not returning tensors, unwrap the batch
     if is_single_text and return_tensors is None:
@@ -268,16 +292,25 @@ def decode(
     """
     tokenizer = get_tokenizer()
 
-    # Convert tensor to list if needed
+    # Convert tensor to list if needed and handle empty inputs robustly
     if isinstance(token_ids, torch.Tensor):
+        # If the tensor is empty, return empty string
+        if token_ids.numel() == 0:
+            return ""
         if token_ids.dim() > 1:
             # Handle batch dimension
             token_ids = token_ids[0].tolist()
         else:
             token_ids = token_ids.tolist()
-    elif isinstance(token_ids[0], list):
-        # Handle batch inputs (first element only)
-        token_ids = token_ids[0]
+    else:
+        # Guard against empty sequences before indexing
+        if isinstance(token_ids, list) and len(token_ids) == 0:
+            return ""
+        if isinstance(token_ids, list) and len(token_ids) > 0 and isinstance(token_ids[0], list):
+            # Handle batch inputs (first element only)
+            if len(token_ids[0]) == 0:
+                return ""
+            token_ids = token_ids[0]
 
     return tokenizer.decode(token_ids, skip_special_tokens=skip_special_tokens)
 
