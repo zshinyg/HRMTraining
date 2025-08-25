@@ -11,7 +11,7 @@ last_reviewed: 2025-08-08
 - `hrm/`: Core HRM model (`model.py`, `layers.py`, `config.py`).
 - `hrm_codegen/`: Generation utilities and mock model for experiments.
 - `scripts/`: Entry points (`train.py`, `evaluate.py`, `convert_mbpp.py`, monitoring tools).
-- `configs/`: YAML configs (symlink from `hrm/configs` → `configs/hrm/`).
+- `configs/`: YAML configs for HRM models and training setups (located at `configs/hrm/`).
 - `tokenization/`: Tokenizer utilities and caching helpers.
 - `data/`, `checkpoints/`, `outputs/`: Local artifacts (not versioned).
 - `tests/` and `test/`: Pytest suites (`tests/disabled/` is skipped).
